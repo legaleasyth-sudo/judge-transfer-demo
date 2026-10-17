@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ระบบโยกย้ายผู้พิพากษา (เดโม)</title>
+<style>
+/* Layout: login screen, then app shell = top bar + left nav (horizontal strip under 900px) + working column */
+:root{
+  --bg:#F4F5F8; --surface:#FFFFFF; --surface2:#F8F9FB; --line:#E2E6EE; --fg:#1A1F2B; --muted:#5B6474; --faint:#98A1B0;
+  --accent:#1F3A68; --accent-fg:#FFFFFF; --accent-soft:#E8EEF9; --gold:#B8892B; --gold-soft:#F7EFDD;
+  --ok:#1E7F4F; --ok-soft:#E6F4EC; --warn:#9A6212; --warn-soft:#FDF3E1; --bad:#B42318; --bad-soft:#FCE8E6;
+  --font:"IBM Plex Sans Thai","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F141C; --surface:#171E29; --surface2:#1C2431; --line:#2A3445; --fg:#E7EBF2; --muted:#A3AEC0; --faint:#6F7B8F;
+  --accent:#8FB0EA; --accent-fg:#0F141C; --accent-soft:#1E2B44; --gold:#D9B25F; --gold-soft:#2E2512;
+  --ok:#5CC48C; --ok-soft:#14301F; --warn:#E3B05A; --warn-soft:#33270F; --bad:#F08A7E; --bad-soft:#3A1A17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F141C; --surface:#171E29; --surface2:#1C2431; --line:#2A3445; --fg:#E7EBF2; --muted:#A3AEC0; --faint:#6F7B8F;
+  --accent:#8FB0EA; --accent-fg:#0F141C; --accent-soft:#1E2B44; --gold:#D9B25F; --gold-soft:#2E2512;
+  --ok:#5CC48C; --ok-soft:#14301F; --warn:#E3B05A; --warn-soft:#33270F; --bad:#F08A7E; --bad-soft:#3A1A17; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:24px;margin:0;text-wrap:balance}h2{font-size:16px;margin:0}h3{font-size:14px;margin:0}
+.sub{color:var(--muted);margin:2px 0 0}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.small{font-size:12px}
+.grow{flex:1;min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.btn{font:inherit;font-weight:500;border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn.icon{padding:4px 9px;flex:none}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.acct:focus-visible,nav.side button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;border-radius:999px;padding:1px 9px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.info{background:var(--accent-soft);color:var(--accent)}
+.pill.neutral{background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+.pill.gold{background:var(--gold-soft);color:var(--gold)}
+.note{border-radius:8px;padding:10px 12px;font-size:13px;background:var(--accent-soft);color:var(--accent)}
+.note.ok{background:var(--ok-soft);color:var(--ok)}.note.warn{background:var(--warn-soft);color:var(--warn)}.note.bad{background:var(--bad-soft);color:var(--bad)}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+select,input[type=number],input[type=text],input[type=password],textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+input[readonly]{background:var(--surface2)}
+textarea{min-height:84px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:500}
+.bar{height:6px;border-radius:3px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.bar i.w{background:var(--warn)}.bar i.b{background:var(--bad)}
+.switch{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.switch input{appearance:none;width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;flex:none;cursor:pointer;margin:1px 0 0;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.switch input:checked{background:var(--accent)}.switch input:checked::after{left:19px}
+.switch input:disabled{opacity:.5}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ----- Login ----- */
+.login{min-height:100vh;display:grid;place-items:center;padding-block:32px}
+.login-card{display:grid;grid-template-columns:400px minmax(0,1fr);max-width:1080px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.login-side{background:var(--accent);color:var(--accent-fg);padding:32px;display:flex;flex-direction:column;gap:18px}
+.login-side h1{font-size:26px}
+.login-side p{margin:0;opacity:.85}
+.login-side .flow{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.login-side .flow div{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+.login-side .flow b{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:color-mix(in srgb,var(--accent-fg) 18%,transparent)}
+.login-side .phase{margin-top:auto;border-radius:10px;padding:12px;background:color-mix(in srgb,var(--accent-fg) 12%,transparent);font-size:13px}
+.login-main{padding:32px;display:flex;flex-direction:column;gap:16px}
+.accts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.acct{font:inherit;color:inherit;text-align:left;display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
+.acct[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:13px;background:var(--gold-soft);color:var(--gold)}
+.av.sm{width:30px;height:30px;font-size:12px}
+@media (max-width:900px){.login-card{grid-template-columns:1fr}.login-side .flow{display:none}}
+@media (max-width:520px){.login-side,.login-main{padding:20px}}
+
+/* ----- Shell ----- */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.topin{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{display:flex;gap:10px;align-items:center;line-height:1.25}
+.brand b{font-size:16px}
+.brand span{font-size:12px;color:var(--muted)}
+.logo{flex:none;width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
+.proto{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.top-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.bell{position:relative}
+.bell em{position:absolute;top:-4px;right:-4px;font-style:normal;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;display:grid;place-items:center;padding:0 4px}
+.who{display:flex;gap:8px;align-items:center;line-height:1.2}
+.who small{display:block;color:var(--muted);font-size:11.5px}
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);gap:24px;max-width:1360px;margin:0 auto;padding-block:20px 48px}
+nav.side{display:flex;flex-direction:column;gap:2px;position:sticky;top:76px;align-self:start}
+nav.side .grp{font-size:11px;font-weight:600;color:var(--faint);letter-spacing:.04em;padding:6px 12px 4px}
+nav.side button{font:inherit;text-align:left;border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:500;display:flex;gap:8px;align-items:center}
+nav.side button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav.side button .cnt{margin-left:auto;font-size:11px;background:var(--bad-soft);color:var(--bad);border-radius:999px;padding:0 7px}
+nav.side .phasebox{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12.5px;background:var(--surface)}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:12px;padding-top:0}
+  nav.side{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding:8px 0;border-bottom:1px solid var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-left:max(16px,env(safe-area-inset-left,0px))}
+  nav.side button{white-space:nowrap;flex:none}nav.side .grp,nav.side .phasebox{display:none}
+  .who .txt,.brand span,.proto{display:none}
+}
+@media (max-width:600px){header.top{position:static}}
+.pagehead{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+.pagehead .grow{min-width:240px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+.grid2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.grid3{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media (max-width:1100px){.grid2{grid-template-columns:minmax(0,1fr) 320px}}
+@media (max-width:980px){.grid2,.grid2e,.grid3{grid-template-columns:minmax(0,1fr)}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{font-size:12px;color:var(--muted)}
+
+/* phase stepper */
+.phases{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ph{border-top:3px solid var(--line);padding-top:8px;font-size:12.5px}
+.ph b{display:block;font-size:13px}
+.ph.done{border-color:var(--ok)}.ph.now{border-color:var(--accent)}
+.ph.now b{color:var(--accent)}
+@media (max-width:700px){.phases{grid-template-columns:1fr}.ph{border-top:0;border-left:3px solid var(--line);padding:2px 0 2px 10px}}
+
+/* wizard */
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.steps button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:5px 12px 5px 6px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.steps button i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);font-size:12px;font-weight:600}
+.steps button[aria-current="step"]{border-color:var(--accent);color:var(--accent);font-weight:600}
+.steps button[aria-current="step"] i{background:var(--accent);color:var(--accent-fg)}
+.steps button.done i{background:var(--ok-soft);color:var(--ok)}
+.choice{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.choice.empty{border-style:dashed;background:transparent;color:var(--faint)}
+.num{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--accent);color:var(--accent-fg)}
+.choice.empty .num{background:var(--surface2);color:var(--faint)}
+.rec{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.rec.picked{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.rec.blocked{opacity:.72}
+.reasons{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
+.r-ok{color:var(--ok)}.r-bad{color:var(--bad)}.r-mid{color:var(--muted)}.r-warn{color:var(--warn)}
+.doc{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--surface2)}
+
+/* tables & lists */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+th{text-align:left;font-weight:500;color:var(--muted);background:var(--surface2);padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+table.click tbody tr{cursor:pointer}table.click tbody tr:hover{background:var(--surface2)}
+tbody tr.sel{background:var(--accent-soft)}
+td.n{font-variant-numeric:tabular-nums;color:var(--muted)}
+.me-tag{font-size:11px;color:var(--gold);font-weight:600;margin-left:4px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.filters button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.step{border-radius:8px;background:var(--surface2);padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.step .pill{white-space:normal}
+.empty-state{color:var(--muted);text-align:center;padding:32px 12px}
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.li:last-child{border-bottom:0}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.dot.w{background:var(--warn)}.dot.b{background:var(--bad)}.dot.o{background:var(--ok)}
+.log .li{align-items:flex-start}
+.log time{flex:none;width:140px;color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.log .li{flex-wrap:wrap}.log time{width:100%}}
+.hbar{display:grid;grid-template-columns:110px minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:13px;margin:6px 0}
+.hbar .track{height:14px;border-radius:4px;background:var(--surface2);overflow:hidden}
+.hbar .track i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.hbar span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.prov{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-items:start}
+.court{border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:13px}
+.court summary{cursor:pointer;display:flex;gap:8px;align-items:center;list-style:none}
+.court summary::-webkit-details-marker{display:none}
+.seats{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.seat{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:5px 8px;border-radius:6px;background:var(--surface2)}
+.seat.vac{border:1px dashed var(--line);background:transparent;color:var(--faint)}
+.region-h{display:flex;gap:10px;align-items:center;margin:18px 0 10px;flex-wrap:wrap}
+.region-h::before{content:"";width:4px;height:18px;border-radius:2px;background:var(--gold)}
+.tree{font-size:12.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.rule{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.rule:last-child{border-bottom:0}
+.code{font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:1px 7px;flex:none}
+.case{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.hero{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.picks{position:sticky;top:80px}
+@media (max-width:980px){.picks{position:static;order:-1}}
+.top-right .btn{white-space:nowrap}
+button.stat{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+button.stat:hover{border-color:var(--accent)}
+button.stat span::after{content:" ›";color:var(--faint)}
+.seat[data-act],.case[data-act]{cursor:pointer}.seat[data-act]:hover{background:var(--accent-soft)}.case[data-act]:hover{border-color:var(--accent)}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{font-size:12px;border-radius:6px;padding:1px 7px;background:var(--surface2);border:1px solid var(--line);white-space:nowrap}
+.chip.x{color:var(--bad);border-color:var(--bad-soft);background:var(--bad-soft);text-decoration:line-through}
+.fgroup{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.fgroup>span{font-size:12px;color:var(--muted);min-width:64px}
+.search{max-width:280px}
+/* nationwide org chart */
+.ochart{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 0 4px}
+.onode{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;text-align:center;cursor:pointer;min-width:190px;display:flex;flex-direction:column;gap:2px;align-items:center}
+.onode:hover,.oitem:hover{border-color:var(--accent)}
+.onode[aria-pressed="true"],.oitem[aria-pressed="true"],.crow[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.onode.root{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);min-width:220px}
+.onode.root .muted{color:inherit;opacity:.8}
+.onode.side{border-style:dashed;background:var(--surface2)}
+.toprow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;width:100%;max-width:860px}
+.toprow .l{display:flex;align-items:center}.toprow .l .onode{flex:none}
+.toprow .l::after{content:"";flex:1;border-top:2px dashed var(--line);min-width:16px}
+.toprow .r{display:flex;align-items:center;flex-direction:row-reverse}.toprow .r .onode{flex:none}
+.toprow .r::after{content:"";flex:1;border-top:2px dashed var(--line);min-width:16px}
+.vline{width:2px;height:22px;background:var(--line)}
+.branches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;width:100%;position:relative;padding-top:22px}
+.branches::before{content:"";position:absolute;top:0;left:16.66%;right:16.66%;height:2px;background:var(--line)}
+.branch{display:flex;flex-direction:column;align-items:center;position:relative}
+.branch::before{content:"";position:absolute;top:-22px;left:50%;width:2px;height:22px;background:var(--line)}
+.branch>.onode{width:100%}
+.olist{display:flex;flex-direction:column;gap:6px;width:100%;margin-top:10px;padding-left:14px;border-left:2px solid var(--line)}
+.oitem{font:inherit;color:inherit;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;display:flex;gap:8px;align-items:center;position:relative}
+.oitem::before{content:"";position:absolute;left:-15px;top:50%;width:13px;height:2px;background:var(--line)}
+.oitem .bar{width:54px;flex:none}
+@media (max-width:900px){.branches{grid-template-columns:minmax(0,1fr);padding-top:0}.branches::before,.branch::before{display:none}.branch{margin-top:16px}
+  .toprow{grid-template-columns:minmax(0,1fr);gap:8px;justify-items:center}.toprow .l::after,.toprow .r::after{display:none}}
+.rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.rcard{font:inherit;color:inherit;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.rcard:hover{border-color:var(--accent)}
+.rcard.demo{border-color:var(--gold)}
+.crow{font:inherit;color:inherit;text-align:left;width:100%;background:transparent;border:1px solid transparent;border-radius:8px;padding:7px 8px;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.crow:hover{background:var(--surface2)}
+.crumbs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:6px}
+.crumbs button{font:inherit;border:0;background:none;color:var(--accent);cursor:pointer;padding:0}
+.sticky{position:sticky;top:80px}
+@media (max-width:980px){.sticky{position:static}}
+/* phones: tables become stacked cards, nav wraps instead of hiding items, login button stays in reach */
+@media (max-width:640px){
+  .tablewrap{overflow:visible}
+  .tablewrap table{min-width:0!important}
+  .tablewrap thead{display:none}
+  .tablewrap tbody tr{display:flex;flex-wrap:wrap;gap:4px 12px;padding:10px 12px;border-bottom:1px solid var(--line);align-items:center}
+  .tablewrap tbody tr:last-child{border-bottom:0}
+  .tablewrap td{border:0;padding:0;font-size:12.5px}
+  .tablewrap td[data-label]:not(.lead)::before{content:attr(data-label) " ";color:var(--faint);font-size:11px}
+  .tablewrap td.lead{flex-basis:100%;order:-1;font-size:14px}
+  .tablewrap td[colspan]{flex-basis:100%}
+  nav.side{flex-wrap:wrap;overflow:visible}
+  .login-go{position:sticky;bottom:0;background:var(--surface);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));margin:0 -4px;border-top:1px solid var(--line);z-index:2}
+  .brand b{font-size:14px}
+  .toast{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}
+  .pagehead h1{font-size:21px}
+  .stat{padding:12px}
+  .stat b{font-size:22px}
+}
+.big{font-size:22px;font-weight:600;line-height:1.3}
+</style>
+
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* =========================================================
+   Demo data (all fictional)
+   ========================================================= */
+const DEMO_DATE="8 ม.ค. 2570";
+const PH=["เปิดรับคำขอ","ตรวจสอบข้อมูล","จัดวางและตรวจทาน","เสนอ ก.ต.","ประกาศผลแล้ว"];
+const PHD=["1 ธ.ค. 69 – 15 ม.ค. 70","16 – 25 ม.ค. 70","26 ม.ค. – 10 ก.พ. 70","ประชุม ก.ต. 20 ก.พ. 70","มีผล 1 เม.ย. 70"];
+const PROV={
+  "เชียงใหม่":[18.79,98.98,5],"ลำพูน":[18.58,99.01,5],"ลำปาง":[18.29,99.49,5],"เชียงราย":[19.91,99.83,5],
+  "พะเยา":[19.17,99.90,5],"แพร่":[18.14,100.14,5],"น่าน":[18.78,100.78,5],"แม่ฮ่องสอน":[19.30,97.97,5],
+  "ตาก":[16.88,99.13,6],"สุโขทัย":[17.01,99.82,6],"อุตรดิตถ์":[17.62,100.10,6],"กำแพงเพชร":[16.48,99.52,6]};
+const COURTS=[
+  ["cm-p","ศาลจังหวัดเชียงใหม่","เชียงใหม่",6],["cm-m","ศาลแขวงเชียงใหม่","เชียงใหม่",3],["cm-j","ศาลเยาวชนฯ จ.เชียงใหม่","เชียงใหม่",2],
+  ["lp-p","ศาลจังหวัดลำพูน","ลำพูน",3],["lg-p","ศาลจังหวัดลำปาง","ลำปาง",4],["lg-j","ศาลเยาวชนฯ จ.ลำปาง","ลำปาง",2],
+  ["cr-p","ศาลจังหวัดเชียงราย","เชียงราย",4],["py-p","ศาลจังหวัดพะเยา","พะเยา",2],["pr-p","ศาลจังหวัดแพร่","แพร่",3],
+  ["nn-p","ศาลจังหวัดน่าน","น่าน",3],["mh-p","ศาลจังหวัดแม่ฮ่องสอน","แม่ฮ่องสอน",3],["tk-p","ศาลจังหวัดตาก","ตาก",3],
+  ["st-p","ศาลจังหวัดสุโขทัย","สุโขทัย",2],["ut-p","ศาลจังหวัดอุตรดิตถ์","อุตรดิตถ์",2],["kp-p","ศาลจังหวัดกำแพงเพชร","กำแพงเพชร",2]
+].map(([id,name,prov,seats])=>({id,name,prov,seats,region:PROV[prov][2]}));
+const C=Object.fromEntries(COURTS.map(c=>[c.id,c]));
+const POS={p:"ผู้พิพากษาศาลจังหวัด",m:"ผู้พิพากษาศาลแขวง",j:"ผู้พิพากษาศาลเยาวชนและครอบครัว"};
+const posOf=cid=>POS[cid.split("-")[1]];
+
+const ACCOUNTS=[
+ {id:"judge",user:"somchai.j",name:"นายสมชาย ใจตรง",role:"judge",roleName:"ผู้พิพากษา",org:"ศาลจังหวัดเชียงราย",judge:"j1284",init:"สช",does:"มีร่างคำขอค้างอยู่ กรอกสถานการณ์ เลือก 3 ศาล แล้วส่ง"},
+ {id:"judge2",user:"ratchanee.p",name:"นางสาวรัชนี ปัญญาดี",role:"judge",roleName:"ผู้พิพากษา · ครบวาระ",org:"ศาลจังหวัดกำแพงเพชร",judge:"j1240",init:"รช",does:"ยื่นแล้วแบบคู่ คู่สมรสเป็นผู้พิพากษาที่เชียงใหม่"},
+ {id:"region",user:"paweena.r5",name:"นางสาวปวีณา รักษ์ธรรม",role:"region",roleName:"เจ้าหน้าที่ภาค 5",org:"สำนักอธิบดีผู้พิพากษาภาค 5",init:"ปว",does:"ตรวจเอกสารและข้อเท็จจริง แจ้งเตือนคนที่ยังไม่ยื่น"},
+ {id:"central",user:"theeradet.hr",name:"นายธีรเดช มั่นธรรม",role:"central",roleName:"เจ้าหน้าที่ส่วนกลาง",org:"กองการเจ้าหน้าที่ สำนักงานศาลยุติธรรม",init:"ธด",does:"ปิดรอบ รันการจัดวาง ล็อกรายคน ตั้งกฎ เสนอ ก.ต."},
+ {id:"kt",user:"worawut.kt",name:"นายวรวุฒิ เที่ยงตรง",role:"kt",roleName:"กรรมการ ก.ต.",org:"คณะกรรมการตุลาการศาลยุติธรรม",init:"วว",does:"ดูร่างบัญชีและรายงานความยุติธรรม อนุมัติหรือส่งกลับ"},
+];
+
+// req: none | draft | submitted. docs: pending | ok | more
+const KEY=[
+ {sen:1102,name:"นายวิชัย ศรีสุข",court:"tk-p",months:74,prefs:["cm-p","lp-p","cm-m"],spouse:{job:"อาชีพอื่น",prov:"เชียงใหม่"},dom:"ลำพูน",past:[],req:{status:"submitted",at:"2 ธ.ค. 2569"}},
+ {sen:1150,name:"นางอรทัย มั่นคง",court:"nn-p",months:40,prefs:["cm-p","cr-p"],spouse:null,dom:"แพร่",past:[],req:{status:"submitted",at:"4 ธ.ค. 2569"}},
+ {sen:1201,name:"นายธนพล แก้วดี",court:"pr-p",months:73,prefs:["lg-p","cm-p","lp-p"],spouse:null,dom:"แพร่",past:[{c:"lg-p",y:2,m:30}],
+   req:{status:"submitted",at:"12 ธ.ค. 2569",special:"บิดาป่วยติดเตียงอยู่ที่ จ.ลำปาง ขอย้ายกลับไปดูแล",docs:[{name:"ใบรับรองแพทย์_บิดา.pdf",status:"pending"}]}},
+ {sen:1240,name:"นางสาวรัชนี ปัญญาดี",court:"kp-p",months:76,prefs:["cm-j","lp-p","cm-p"],spouse:{job:"ผู้พิพากษา",prov:"เชียงใหม่",link:"j1330"},dom:"กำแพงเพชร",
+   past:[{c:"tk-p",y:7,m:36},{c:"st-p",y:10,m:24}],mother:null,cond:{near:true,km:60,sep:"court"},
+   req:{status:"submitted",at:"20 ธ.ค. 2569",special:"ยื่นแบบคู่กับคู่สมรส (ผู้พิพากษาศาลแขวงเชียงใหม่)",couple:true,docs:[{name:"ทะเบียนสมรส.pdf",status:"pending"}],fallback:true}},
+ {sen:1284,name:"นายสมชาย ใจตรง",court:"cr-p",months:22,prefs:["cm-p","lp-p"],spouse:{job:"อัยการ",prov:"ลำปาง"},dom:"พะเยา",mother:"พะเยา",kids:"เชียงใหม่",
+   past:[{c:"py-p",y:6,m:36},{c:"nn-p",y:9,m:30}],cond:{near:true,km:120,sep:"prov",careNear:true},req:{status:"draft",docs:[],reason:"",fallback:true}},
+ {sen:1297,name:"นางสาวกานดา พรหมมา",court:"py-p",months:70,prefs:["nn-p","pr-p","cr-p"],spouse:null,dom:"น่าน",past:[],
+   req:{status:"submitted",at:"28 ธ.ค. 2569",special:"รักษาโรคต่อเนื่องที่โรงพยาบาลน่าน",docs:[{name:"ประวัติการรักษา.pdf",status:"ok"}]}},
+ {sen:1310,name:"นายประเสริฐ ทองคำ",court:"lg-p",months:75,prefs:["cm-p","cm-m","cm-j"],spouse:{job:"ทนายความ",prov:"เชียงใหม่"},dom:"ลำปาง",past:[],cond:{near:true,km:100,sep:"court"},
+   req:{status:"submitted",at:"3 ม.ค. 2570",special:"บุตรเรียนชั้น ม.5 ที่ จ.เชียงใหม่",docs:[{name:"หนังสือรับรองการศึกษา.pdf",status:"more",note:"ขอสำเนาทะเบียนบ้านเพิ่ม"}]}},
+ {sen:1322,name:"นางพรทิพย์ วงศ์ใหญ่",court:"cm-m",months:72,prefs:["pr-p","lp-p"],spouse:null,dom:"แพร่",past:[],req:{status:"submitted",at:"6 ม.ค. 2570"}},
+ {sen:1330,name:"นายกิตติพงษ์ ปัญญาดี",court:"cm-m",months:50,prefs:["lp-p","cm-j"],spouse:{job:"ผู้พิพากษา",prov:"กำแพงเพชร",link:"j1240"},dom:"เชียงใหม่",past:[],
+   req:{status:"submitted",at:"20 ธ.ค. 2569",special:"ยื่นแบบคู่กับคู่สมรส",couple:true}},
+ {sen:1345,name:"นายอนุชา สายทอง",court:"ut-p",months:30,prefs:["cm-p"],spouse:null,dom:"เชียงใหม่",past:[],req:{status:"draft"}},
+ {sen:1351,name:"นางสาวศิริพร นาคสวัสดิ์",court:"st-p",months:74,prefs:["tk-p","kp-p","ut-p"],spouse:{job:"อัยการ",prov:"ตาก"},dom:"สุโขทัย",past:[],req:{status:"submitted",at:"9 ธ.ค. 2569"}},
+ {sen:1420,name:"นายพงศกร ดอยคำ",court:"mh-p",months:74,prefs:[],spouse:null,dom:"เชียงใหม่",past:[],req:{status:"none"}},
+];
+const COUPLES=[["j1240","j1330",60]];
+const FIRST=["นายกิตติ","นางมาลี","นายภาคิน","นางสาวนภา","นายสุรศักดิ์","นายกฤษดา","นางวรรณา","นายชัยวัฒน์","นางศศิธร","นายอดิศร","นายเอกชัย","นางสาวจิราพร","นายณัฐวุฒิ","นางปิยะดา","นายพีระพงษ์","นางสาวสุนิสา","นายอภิชาติ","นางสาวธิดา","นายวีรพล","นางจันทร์เพ็ญ","นายปกรณ์","นางสาวอรอุมา","นายธีรวัฒน์","นางสุภาพร","นายเกียรติศักดิ์","นางสาวพิมพ์ชนก"];
+const LAST=["บุญมา","สุขใจ","ศักดิ์ดี","ใจงาม","ทองดี","พรหมมา","ดีงาม","มีสุข","ทองแท้","พูนผล","รุ่งเรือง","แสงทอง","บุญเรือง","คำมา","ชัยมงคล","วงศ์คำ","ทองมี","อินทร์แก้ว","ศรีวงศ์","จันทร์หอม","สมบูรณ์","ธรรมรักษ์","คงเจริญ","นาคประเสริฐ","อ่อนศรี","ปานทอง"];
+const SUBDATES=["2 ธ.ค. 2569","5 ธ.ค. 2569","11 ธ.ค. 2569","18 ธ.ค. 2569","25 ธ.ค. 2569","3 ม.ค. 2570","7 ม.ค. 2570"];
+function rng(seed){return()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296}}
+function buildJudges(){
+  // the rest of the bench is generated from a fixed seed so every viewer sees the same data
+  const R=rng(20570401);const js=KEY.map(k=>JSON.parse(JSON.stringify(k)));
+  const fill={};COURTS.forEach(c=>fill[c.id]=0);js.forEach(j=>fill[j.court]++);
+  const popular=["cm-p","cm-p","cm-m","lp-p","cm-j","cr-p","lg-p","pr-p","tk-p","nn-p","st-p","py-p"];
+  let sen=1360,i=0;
+  const target={...Object.fromEntries(COURTS.map(c=>[c.id,c.seats])),"mh-p":1,"nn-p":2,"lp-p":2,"cm-p":5,"ut-p":1};
+  const provs=Object.keys(PROV);
+  for(const c of COURTS){while(fill[c.id]<target[c.id]){
+    sen+=Math.floor(R()*30)+8;
+    const months=Math.floor(R()*70)+6;const p=[];
+    while(p.length<3){const x=popular[Math.floor(R()*popular.length)];if(x!==c.id&&!p.includes(x))p.push(x)}
+    const prefs=R()<0.15?[]:p.slice(0,1+Math.floor(R()*3));
+    const st=prefs.length?(R()<0.88?"submitted":"draft"):"none";
+    js.push({sen,name:FIRST[i%FIRST.length]+" "+LAST[(i*7)%LAST.length],court:c.id,months:R()<0.18?72+Math.floor(R()*6):months,prefs,
+      spouse:R()<0.25?{job:["อัยการ","ทนายความ","อาชีพอื่น"][Math.floor(R()*3)],prov:provs[Math.floor(R()*provs.length)]}:null,
+      dom:provs[Math.floor(R()*provs.length)],past:[],req:{status:st,at:st==="submitted"?SUBDATES[Math.floor(R()*SUBDATES.length)]:null}});
+    fill[c.id]++;i++;
+  }}
+  const out=js.sort((a,b)=>a.sen-b.sen).map(j=>({...j,id:"j"+j.sen,req:{docs:[],reason:"",fallback:false,...j.req},cond:j.cond||{near:false,km:120,sep:"court"}}));
+  enrich(out);return out;
+}
+// Fills the generated judges with family situation, posting history, reasons, documents and a request
+// timeline. Uses its own seed so the bench itself (and therefore the placement) stays the same.
+const KEYIDS=new Set(KEY.map(k=>k.sen));
+const REASONS={spouse:p=>`คู่สมรสทำงานที่ จ.${p} อยากอยู่ใกล้กันมากขึ้น`,mother:p=>`ต้องดูแลบิดามารดาสูงอายุที่ จ.${p}`,kids:p=>`บุตรกำลังเรียนที่ จ.${p} ไม่อยากให้ย้ายโรงเรียนกลางปี`,
+  grow:()=>"อยากได้ประสบการณ์ในศาลที่มีคดีหลากหลายขึ้น",home:p=>`อยากกลับไปใกล้บ้านเกิดที่ จ.${p}`};
+const DAYS=["1 ธ.ค. 2569",...SUBDATES];
+function enrich(js){
+  const R=rng(31337),provs=Object.keys(PROV),pick=a=>a[Math.floor(R()*a.length)];
+  for(const j of js){
+    if(!KEYIDS.has(j.sen)){
+      if(R()<0.3)j.mother=pick(provs);
+      if(R()<0.3)j.kids=pick(provs);
+      if(R()<0.08)j.health=true;
+      // earlier posts in other provinces, long enough ago not to trip the no-return rule
+      const n=Math.floor(R()*3),used=new Set([C[j.court].prov]);j.past=[];
+      for(let i=0;i<n;i++){const c=pick(COURTS.filter(c=>!used.has(c.prov)));used.add(c.prov);j.past.push({c:c.id,y:5+i*3+Math.floor(R()*2),m:24+Math.floor(R()*16)})}
+      if(j.req.status!=="none"){const parts=[];if(j.spouse)parts.push(REASONS.spouse(j.spouse.prov));if(j.mother)parts.push(REASONS.mother(j.mother));if(j.kids)parts.push(REASONS.kids(j.kids));
+        if(!parts.length)parts.push(R()<0.5?REASONS.grow():REASONS.home(j.dom));j.req.reason=parts.join(" และ")}
+      if(j.req.status==="submitted"){if(j.mother&&R()<0.6)j.req.docs.push({name:"ใบรับรองแพทย์_บิดามารดา.pdf",status:pick(["pending","ok","ok"])});
+        if(j.health)j.req.docs.push({name:"ประวัติการรักษา.pdf",status:pick(["pending","ok"])})}
+      if(j.spouse&&j.spouse.job!=="อาชีพอื่น"&&R()<0.6)j.cond={near:true,km:pick([80,100,120,150]),sep:pick(["court","prov"])};
+      j.req.fallback=mustMoveRaw(j)&&R()<0.7;
+    }
+    const h=[],at=j.req.at,ix=DAYS.indexOf(at),made=ix>0?DAYS[ix-1]:"1 ธ.ค. 2569";
+    if(j.req.status==="submitted"){h.push({t:made,what:"เริ่มกรอกคำขอและบันทึกร่าง"});h.push({t:at,what:`ส่งคำขอ ${j.prefs.length} อันดับ`});
+      for(const d of j.req.docs){h.push({t:at,what:`แนบเอกสาร ${d.name}`});
+        if(d.status==="ok")h.push({t:"5 ม.ค. 2570",what:`เจ้าหน้าที่ภาคยืนยันเอกสาร ${d.name}`});
+        if(d.status==="more")h.push({t:"6 ม.ค. 2570",what:`เจ้าหน้าที่ภาคขอเอกสารเพิ่ม: ${d.note||""}`})}}
+    else if(j.req.status==="draft")h.push({t:j.me||j.sen===1284?"28 ธ.ค. 2569":pick(DAYS),what:"บันทึกร่างคำขอ ยังไม่ได้ส่ง"});
+    j.req.hist=h;
+  }
+}
+const mustMoveRaw=j=>j.months>=72;
+
+/* =========================================================
+   State
+   ========================================================= */
+let JUDGES,J,S;
+const DEFAULT_RULES=()=>({T02:{on:true,cap:72},T03:{on:true},R01:{on:true,years:4},C01:{mode:"warn"},C02:{on:true},C03:{on:true}});
+let RULES=DEFAULT_RULES();
+function init(){
+  JUDGES=buildJudges();J=Object.fromEntries(JUDGES.map(j=>[j.id,j]));RULES=DEFAULT_RULES();
+  S={user:null,pick:"judge",page:null,phase:0,result:null,locks:{},reminded:{},ktNote:"",ktDecision:null,sel:null,filter:"all",rfilter:"all",step:0,log:[],seen:{},qf:{status:"all",region:"all",flag:null},q:"",nsel:"root",nreg:null,detail:null,back:null,openCourt:null};
+  S.log=[
+    {t:"1 ธ.ค. 2569 09:00",who:"สำนักงานศาลยุติธรรม",what:"เปิดรอบการโยกย้าย มีผล 1 เม.ย. 2570 รับคำขอถึง 15 ม.ค. 2570"},
+    {t:"2 ธ.ค. 2569 08:41",who:"นายวิชัย ศรีสุข",what:"ยื่นคำขอย้าย 3 อันดับ"},
+    {t:"12 ธ.ค. 2569 13:20",who:"นายธนพล แก้วดี",what:"ยื่นคำขอพร้อมเหตุผลพิเศษ และแนบใบรับรองแพทย์"},
+    {t:"20 ธ.ค. 2569 10:05",who:"นางสาวรัชนี ปัญญาดี",what:"ยื่นคำขอแบบคู่กับ นายกิตติพงษ์ ปัญญาดี"},
+    {t:"3 ม.ค. 2570 15:12",who:"นายประเสริฐ ทองคำ",what:"ยื่นคำขอพร้อมหนังสือรับรองการศึกษาบุตร"},
+    {t:"5 ม.ค. 2570 11:30",who:"นางสาวปวีณา รักษ์ธรรม",what:"ยืนยันเอกสารของ นางสาวกานดา พรหมมา"},
+    {t:"6 ม.ค. 2570 09:48",who:"นางสาวปวีณา รักษ์ธรรม",what:"ขอเอกสารเพิ่มจาก นายประเสริฐ ทองคำ (สำเนาทะเบียนบ้าน)"},
+  ];
+}
+init();
+
+function stamp(){const d=new Date();return `${DEMO_DATE} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
+function log(what,who){S.log.push({t:stamp(),who:who||(S.user?S.user.name:"ระบบ"),what})}
+function hist(j,what){(j.req.hist=j.req.hist||[]).push({t:stamp(),what:S.user?`${what} (${S.user.name})`:what})}
+
+/* =========================================================
+   Rules
+   ========================================================= */
+const mustMove=j=>RULES.T02.on&&j.months>=RULES.T02.cap;
+function provMonths(j,prov){let m=C[j.court].prov===prov?j.months:0;for(const p of j.past)if(C[p.c].prov===prov)m+=p.m;return m}
+function check(j,cid){
+  const c=C[cid],out=[];
+  if(RULES.T03.on){const m=provMonths(j,c.prov);if(m>=RULES.T02.cap)out.push({code:"T-03",sev:"block",msg:`วาระสะสมใน จ.${c.prov} ครบ ${RULES.T02.cap} เดือนแล้ว`})}
+  if(RULES.R01.on){const p=j.past.find(p=>p.c===cid&&p.y<RULES.R01.years);if(p)out.push({code:"R-01",sev:"block",msg:`เคยอยู่ศาลนี้เมื่อ ${p.y} ปีก่อน (ห้ามกลับภายใน ${RULES.R01.years} ปี)`})}
+  if(RULES.C01.mode!=="off"&&j.dom===c.prov)out.push({code:"C-01",sev:RULES.C01.mode,msg:`จ.${c.prov} เป็นภูมิลำเนา`});
+  if(RULES.C02.on&&j.spouse&&j.spouse.job==="อัยการ"&&j.spouse.prov===c.prov)out.push({code:"C-02",sev:"block",msg:"คู่สมรสเป็นพนักงานอัยการในเขตอำนาจนี้"});
+  if(RULES.C03.on&&j.spouse&&j.spouse.job==="ทนายความ"&&j.spouse.prov===c.prov)out.push({code:"C-03",sev:"warn",msg:"คู่สมรสเป็นทนายความในเขตนี้"});
+  return out;
+}
+const blocked=(j,cid)=>check(j,cid).some(x=>x.sev==="block");
+function km(a,b){if(a===b)return 0;const[la1,lo1]=PROV[a],[la2,lo2]=PROV[b];const r=Math.PI/180,d=Math.acos(Math.min(1,Math.sin(la1*r)*Math.sin(la2*r)+Math.cos(la1*r)*Math.cos(la2*r)*Math.cos((lo2-lo1)*r)))*6371;return Math.round(d*1.3)}
+const sub=j=>j.req.status==="submitted"?j.prefs:[];
+
+/* =========================================================
+   Matching
+   Deferred acceptance. Every court ranks applicants the same way: a judge locked there by staff first,
+   then a judge already sitting there (and not forced to move), then everyone by seniority.
+   Non-forced judges list their own court last, so nobody is pushed out of their seat and freed seats
+   flow on as a vacancy chain. Only submitted requests count; drafts are treated as no request.
+   ========================================================= */
+function runMatch(){
+  const L0=S.locks;
+  const pr=j=>{if(L0[j.id])return[L0[j.id]];const list=sub(j).filter(c=>c!==j.court&&!blocked(j,c));if(!mustMove(j))list.push(j.court);return list};
+  const prio=(j,cid)=>(L0[j.id]===cid?-1e7:0)+(j.court===cid&&!mustMove(j)&&!L0[j.id]?0:1e6)+j.sen;
+  const lists=Object.fromEntries(JUDGES.map(j=>[j.id,pr(j)]));
+  const next=Object.fromEntries(JUDGES.map(j=>[j.id,0]));
+  const held=Object.fromEntries(COURTS.map(c=>[c.id,[]]));
+  const free=JUDGES.map(j=>j.id);
+  while(free.length){
+    const id=free.shift(),j=J[id],L=lists[id];
+    if(next[id]>=L.length)continue;
+    const cid=L[next[id]++];const h=held[cid];h.push(id);
+    h.sort((a,b)=>prio(J[a],cid)-prio(J[b],cid));
+    if(h.length>C[cid].seats)free.push(h.pop());
+  }
+  const res={};
+  for(const cid in held)for(const id of held[cid]){const j=J[id];
+    if(L0[id])res[id]={to:cid,kind:"lock",rank:sub(j).indexOf(cid)+1||null};
+    else res[id]={to:cid,kind:cid===j.court?"stay":"pref",rank:cid===j.court?null:sub(j).indexOf(cid)+1}}
+  // Stage C: forced movers left without a seat get the best remaining seat for their own "must" conditions
+  const left=Object.fromEntries(COURTS.map(c=>[c.id,c.seats-held[c.id].length]));
+  for(const j of JUDGES){if(res[j.id])continue;
+    const cands=COURTS.filter(c=>left[c.id]>0&&c.id!==j.court&&!blocked(j,c.id)).map(c=>{
+      let s=0;const why=[];const p0=sub(j)[0];const anchor=p0?C[p0].prov:j.dom;
+      if(j.cond&&j.cond.near&&j.spouse){const d=km(j.spouse.prov,c.prov);const sepOk=j.cond.sep==="prov"?c.prov!==j.spouse.prov:true;
+        if(d<=j.cond.km&&sepOk){s-=10000;why.push(`ห่างคู่สมรส ${d} กม. ตรงเงื่อนไขจำเป็น`)}}
+      const d2=km(anchor,c.prov);s+=d2;why.push(p0?`ห่างจากตัวเลือกที่ 1 ประมาณ ${d2} กม.`:`ห่างภูมิลำเนาประมาณ ${d2} กม.`);return{c,s,why}}).sort((a,b)=>a.s-b.s);
+    if(cands.length){const b=cands[0];left[b.c.id]--;held[b.c.id].push(j.id);res[j.id]={to:b.c.id,kind:"auto",why:b.why}}
+    else res[j.id]={to:null,kind:"none"};
+  }
+  // fairness check: nobody holds a seat that a more senior judge wanted more and was allowed to take
+  let envy=0;
+  for(const j of JUDGES){const r=res[j.id];const L=lists[j.id];const pos=r.to?L.indexOf(r.to):L.length;
+    for(const cid of L.slice(0,pos<0?L.length:pos)){if(held[cid].some(o=>prio(J[o],cid)>prio(j,cid)))envy++}}
+  return {res,held,lists,prio,envy,at:stamp()};
+}
+function rerun(){S.result=runMatch()}
+function coupleIssues(){
+  if(!S.result)return[];
+  return COUPLES.map(([a,b,max])=>{const ta=S.result.res[a].to||J[a].court,tb=S.result.res[b].to||J[b].court;const d=km(C[ta].prov,C[tb].prov);
+    return{a,b,ta,tb,d,max,same:ta===tb,ok:d<=max&&ta!==tb}});
+}
+function explain(j){
+  const r=S.result.res[j.id],out=[];
+  if(r.kind==="lock")out.push({tone:"info",head:`ล็อกโดยเจ้าหน้าที่ · ${C[r.to].name}`,body:"เจ้าหน้าที่กำหนดผลรายนี้เอง ระบบจัดคนอื่นรอบ ๆ ผลนี้"});
+  for(const [i,cid] of sub(j).entries()){
+    if(r.to===cid){if(r.kind!=="lock")out.push({tone:"ok",head:`อันดับ ${i+1} · ${C[cid].name} · ได้`,body:"ผ่านกฎทุกข้อ และมีที่นั่งเมื่อถึงลำดับอาวุโสของคุณ"});break}
+    const ch=check(j,cid).filter(x=>x.sev==="block");
+    if(ch.length){out.push({tone:"bad",head:`อันดับ ${i+1} · ${C[cid].name} · เลือกไม่ได้`,body:ch.map(x=>`${x.code} ${x.msg}`).join(" · ")});continue}
+    if(r.kind==="lock")continue;
+    const ahead=S.result.held[cid].map(id=>J[id]).filter(o=>S.result.prio(o,cid)<S.result.prio(j,cid));
+    const names=ahead.map(o=>S.locks[o.id]?`#${fmt(o.sen)} (ล็อก)`:o.court===cid&&!mustMove(o)?`#${fmt(o.sen)} (อยู่เดิม)`:`#${fmt(o.sen)}`);
+    out.push({tone:"bad",head:`อันดับ ${i+1} · ${C[cid].name} · ไม่ได้`,body:`มี ${C[cid].seats} ที่นั่ง ถูกจัดให้ผู้มีลำดับก่อนครบแล้ว: ${names.join(", ")}`});
+  }
+  if(r.kind==="stay")out.push({tone:"neutral",head:`อยู่ที่ ${C[j.court].name}`,body:sub(j).length?"ไม่ได้ตัวเลือกที่ยื่น และยังไม่ครบวาระ จึงอยู่ตำแหน่งเดิม":j.req.status==="draft"?"มีร่างคำขอแต่ไม่ได้ส่งก่อนปิดรับ จึงถือว่าไม่ได้ยื่น":"ไม่ได้ยื่นขอย้าย"});
+  if(r.kind==="auto")out.push({tone:"warn",head:`เสนออัตโนมัติ · ${C[r.to].name}`,body:`ครบวาระต้องย้ายแต่ไม่ได้ตัวเลือก ระบบเลือกจากที่นั่งที่เหลือ: ${r.why.join(" · ")} · ต้องให้เจ้าหน้าที่ยืนยัน`});
+  if(r.kind==="none")out.push({tone:"bad",head:"ยังไม่มีที่ลง",body:"ไม่มีที่นั่งเหลือที่ผ่านกฎ เจ้าหน้าที่ต้องจัดการเอง"});
+  return out;
+}
+function statusOf(j){const r=S.result.res[j.id];
+  if(r.kind==="lock")return["info","ล็อกโดยเจ้าหน้าที่"];
+  if(r.kind==="pref")return["ok",`ได้อันดับ ${r.rank}`];if(r.kind==="auto")return["warn","เสนออัตโนมัติ"];
+  if(r.kind==="none")return["bad","ยังไม่มีที่ลง"];return["neutral",sub(j).length?"อยู่ที่เดิม":"ไม่ได้ขอย้าย"]}
+
+/* =========================================================
+   Helpers
+   ========================================================= */
+const fmt=n=>n.toLocaleString("th-TH");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const pill=(t,txt)=>`<span class="pill ${t}">${esc(txt)}</span>`;
+const root=document.getElementById("root");
+function toast(msg){document.querySelectorAll(".toast").forEach(x=>x.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
+function reqPill(j){const s=j.req.status;if(s==="submitted")return pill("ok","ยื่นแล้ว");if(s==="draft")return pill("warn","ร่าง ยังไม่ส่ง");return pill(mustMove(j)?"bad":"neutral","ยังไม่ยื่น")}
+const DOCP={pending:["warn","รอตรวจ"],ok:["ok","ยืนยันแล้ว"],more:["bad","ขอเอกสารเพิ่ม"]};
+const docPill=d=>pill(...DOCP[d.status]);
+const pendingDocs=j=>(j.req.docs||[]).filter(d=>d.status==="pending").length;
+const CUR=()=>J[S.user.judge];
+const shortC=cid=>C[cid].name.replace("ศาลจังหวัด","จ.").replace("ศาลแขวง","แขวง").replace("ศาลเยาวชนฯ จ.","เยาวชนฯ ");
+const inRegion=(j,rg)=>C[j.court].region===rg;
+const LOGO=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 0 0 6 0L5 7zM19 7l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>`;
+function phaseStepper(){return`<div class="phases">${PH.map((p,i)=>`<div class="ph ${i<S.phase?"done":i===S.phase?"now":""}"><b>${i<S.phase?"✓ ":""}${esc(p)}</b><span class="muted">${esc(PHD[i])}</span></div>`).join("")}</div>`}
+
+/* =========================================================
+   Notifications (derived from state, per role)
+   ========================================================= */
+function notes(){
+  const u=S.user,out=[];if(!u)return out;
+  if(u.role==="judge"){const j=CUR();
+    if(S.phase===0&&j.req.status!=="submitted")out.push({tone:mustMove(j)?"b":"w",text:`ยังไม่ได้ส่งคำขอ ปิดรับ 15 ม.ค. 2570${mustMove(j)?" · คุณครบวาระต้องย้าย":""}`,go:"wish"});
+    if(S.reminded[j.id]&&j.req.status!=="submitted")out.push({tone:"b",text:"เจ้าหน้าที่ภาคส่งแจ้งเตือนให้ยื่นคำขอ",go:"wish"});
+    for(const d of j.req.docs||[])if(d.status==="more")out.push({tone:"b",text:`เจ้าหน้าที่ขอเอกสารเพิ่ม: ${d.note||d.name}`,go:"wish"});
+    if(S.phase===4){const r=S.result.res[j.id];out.push({tone:"o",text:r.to&&r.to!==j.court?`ประกาศผลแล้ว: ย้ายไป ${C[r.to].name}`:"ประกาศผลแล้ว: อยู่ที่เดิม",go:"result"})}
+    if(S.phase>0&&S.phase<4)out.push({tone:"",text:`รอบนี้อยู่ขั้น "${PH[S.phase]}"`,go:"result"});
+  }
+  if(u.role==="region"){const rj=JUDGES.filter(j=>inRegion(j,5));
+    const pd=rj.filter(pendingDocs).length;if(pd)out.push({tone:"w",text:`เอกสารรอตรวจ ${pd} ราย`,go:"review"});
+    const miss=rj.filter(j=>mustMove(j)&&j.req.status!=="submitted"&&!S.reminded[j.id]).length;if(miss&&S.phase===0)out.push({tone:"b",text:`ครบวาระแต่ยังไม่ส่งคำขอ ${miss} ราย ยังไม่ได้แจ้งเตือน`,go:"rhome"});
+  }
+  if(u.role==="central"){
+    if(S.phase===0)out.push({tone:"",text:"ถึงกำหนดปิดรับคำขอแล้ว กดปิดรับเมื่อพร้อม",go:"chome"});
+    if(S.phase===1)out.push({tone:"",text:"ข้อมูลพร้อมแล้ว เริ่มจัดวางได้",go:"chome"});
+    if(S.phase===2){const n=JUDGES.filter(j=>["auto","none"].includes(S.result.res[j.id].kind)).length;if(n)out.push({tone:"w",text:`มี ${n} รายที่ระบบเสนออัตโนมัติ รอยืนยัน`,go:"run"});
+      coupleIssues().filter(c=>!c.ok).forEach(c=>out.push({tone:"w",text:`ยื่นแบบคู่ ${J[c.a].name} ${c.same?"ได้ศาลเดียวกัน":"ห่างกัน "+c.d+" กม."}`,go:"run"}))}
+    if(S.ktNote&&S.phase===2)out.push({tone:"b",text:`ก.ต. ส่งกลับ: ${S.ktNote}`,go:"chome"});
+  }
+  if(u.role==="kt"&&S.phase===3)out.push({tone:"w",text:"มีร่างบัญชีรอพิจารณา",go:"khome"});
+  return out;
+}
+
+/* =========================================================
+   Login
+   ========================================================= */
+function renderLogin(){
+  const a=ACCOUNTS.find(x=>x.id===S.pick);
+  root.innerHTML=`<div class="login pad"><div class="login-card">
+    <div class="login-side">
+      <div class="row"><div class="logo" style="background:var(--accent-fg);color:var(--accent)">${LOGO}</div><span class="proto" style="color:var(--accent-fg);border-color:currentColor">ต้นแบบ · ข้อมูลสมมติ</span></div>
+      <div><h1>ระบบโยกย้ายผู้พิพากษา</h1><p>ยื่นความประสงค์ จัดวางตามอาวุโสและระเบียบ ตรวจทาน และเสนอ ก.ต. ในที่เดียว</p></div>
+      <div class="flow">
+        <div><b>1</b><span>ผู้พิพากษากรอกสถานการณ์ชีวิตและเลือก 3 ศาล ระบบบอกทันทีว่าศาลไหนติดกฎ</span></div>
+        <div><b>2</b><span>เจ้าหน้าที่ภาคตรวจเอกสารและแจ้งเตือนคนที่ยังไม่ยื่น</span></div>
+        <div><b>3</b><span>ส่วนกลางปิดรับ รันการจัดวาง ล็อกบางราย แล้วเสนอ ก.ต.</span></div>
+        <div><b>4</b><span>ก.ต. ดูรายงานความยุติธรรม อนุมัติหรือส่งกลับ</span></div>
+        <div><b>5</b><span>ผู้พิพากษาเห็นผลพร้อมเหตุผลรายคน</span></div>
+      </div>
+      <div class="phase"><b>รอบมีผล 1 เมษายน 2570</b><br>ตอนนี้: ${esc(PH[S.phase])} · วันที่ในเดโม ${DEMO_DATE}</div>
+    </div>
+    <div class="login-main">
+      <div><h2 style="font-size:20px">เข้าสู่ระบบ</h2><p class="sub">เลือกบัญชีเดโมด้านล่าง ทุกบทบาทใช้ข้อมูลชุดเดียวกัน สิ่งที่ทำในบทบาทหนึ่งจะเห็นในอีกบทบาท</p></div>
+      <div class="accts" role="group" aria-label="บัญชีเดโม">${ACCOUNTS.map(x=>`<button class="acct" data-act="pick" data-arg="${x.id}" aria-pressed="${x.id===S.pick}">
+        <span class="av">${x.init}</span><span class="grow"><b>${esc(x.name)}</b><br><span class="small" style="color:var(--accent);font-weight:600">${esc(x.roleName)}</span><br><span class="small muted">${esc(x.does)}</span></span></button>`).join("")}</div>
+      <div class="row2">
+        <label class="f">ชื่อผู้ใช้<input type="text" value="${esc(a.user)}" readonly></label>
+        <label class="f">รหัสผ่าน<input type="password" value="demo-only" readonly></label>
+      </div>
+      <div class="row login-go"><button class="btn primary" data-act="login" style="min-width:180px">เข้าสู่ระบบเป็น ${esc(a.roleName)}</button>
+        <span class="small muted">บัญชีเดโม ไม่มีการเก็บรหัสผ่าน</span><span class="grow"></span>
+        ${S.phase>0||S.log.length>7?`<button class="btn small ghost" data-act="reset">รีเซ็ตเดโม</button>`:""}</div>
+    </div>
+  </div></div>`;
+}
+
+/* =========================================================
+   Shell
+   ========================================================= */
+const NAV={
+  judge:[["home","หน้าหลัก"],["wish","ยื่นความประสงค์"],["result","ผลการโยกย้าย"],["history","ประวัติวาระ"],["nation","ผังศาลทั้งหมด"]],
+  region:[["rhome","ภาพรวมภาค 5"],["review","ตรวจสอบคำขอ"],["org","ที่นั่งในภาค 5"],["nation","ผังศาลทั้งหมด"]],
+  central:[["chome","ภาพรวมรอบ"],["reqs","คำขอทั้งหมด"],["run","ผลการจัดวาง"],["nation","ผังศาลทั้งหมด"],["org","ที่นั่งรอบนี้"],["rules","กฎและข้อจำกัด"],["log","บันทึกการดำเนินการ"]],
+  kt:[["khome","ร่างบัญชีเสนอ"],["reqs","คำขอทั้งหมด"],["nation","ผังศาลทั้งหมด"],["org","ที่นั่งรอบนี้"],["log","บันทึกการดำเนินการ"]],
+};
+function navCount(role,page){
+  if(role==="region"&&page==="review")return JUDGES.filter(j=>inRegion(j,5)&&pendingDocs(j)).length;
+  if(role==="central"&&page==="run"&&S.phase===2)return JUDGES.filter(j=>["auto","none"].includes(S.result.res[j.id].kind)).length;
+  if(role==="kt"&&page==="khome"&&S.phase===3)return 1;
+  if(role==="judge"&&page==="wish"&&S.phase===0&&CUR().req.status!=="submitted")return 1;
+  return 0;
+}
+function render(){
+  if(!S.user){renderLogin();return}
+  const u=S.user,n=notes();
+  root.innerHTML=`<header class="top"><div class="topin pad">
+      <div class="brand"><div class="logo">${LOGO}</div><div><b>ระบบโยกย้ายผู้พิพากษา</b><br><span>รอบมีผล 1 เม.ย. 2570 · ${esc(PH[S.phase])}</span></div></div>
+      <span class="proto">ต้นแบบ · ข้อมูลสมมติ</span>
+      <div class="top-right">
+        <button class="btn icon ghost bell" data-act="nav" data-arg="${NAV[u.role][0][0]}" aria-label="การแจ้งเตือน ${n.length} รายการ" title="การแจ้งเตือน"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>${n.length?`<em>${n.length}</em>`:""}</button>
+        <div class="who"><span class="av sm">${u.init}</span><span class="txt"><b>${esc(u.name)}</b><small>${esc(u.roleName)}</small></span></div>
+        <button class="btn small" data-act="logout">สลับบทบาท</button>
+      </div></div></header>
+    <div class="shell pad">
+      <nav class="side" aria-label="เมนู">
+        <div class="grp">${esc(u.org)}</div>
+        ${NAV[u.role].map(([k,v])=>{const c=navCount(u.role,k);return`<button data-act="nav" data-arg="${k}" ${(S.page==="req"?S.back:S.page)===k?'aria-current="page"':""}>${esc(v)}${c?`<span class="cnt">${c}</span>`:""}</button>`}).join("")}
+        <div class="phasebox"><b>ขั้นของรอบนี้</b><div class="small muted" style="margin:2px 0 8px">${esc(PH[S.phase])} · ${esc(PHD[S.phase])}</div><div class="bar"><i style="width:${(S.phase+1)/5*100}%"></i></div></div>
+      </nav>
+      <main id="main">${PAGES[S.page]()}</main>
+    </div>`;
+  labelTables();
+}
+// copies each column header onto its cells so phone layouts can show them as stacked cards
+const LEAD=["ชื่อ","ศาล","จังหวัด"];
+function labelTables(){for(const t of root.querySelectorAll(".tablewrap table")){const hs=[...t.querySelectorAll("thead th")].map(th=>th.textContent.trim());
+  for(const tr of t.querySelectorAll("tbody tr"))[...tr.children].forEach((td,i)=>{if(td.hasAttribute("colspan")||!hs[i])return;td.dataset.label=hs[i];if(LEAD.includes(hs[i])&&!tr.querySelector(".lead"))td.classList.add("lead")})}}
+function revealAside(){if(innerWidth<=980){const a=root.querySelector("aside");if(a)a.scrollIntoView({behavior:"smooth",block:"start"})}}
+function go(page){S.page=page;render();window.scrollTo({top:0})}
+
+/* =========================================================
+   Judge pages
+   ========================================================= */
+function noteList(n){return n.length?`<div class="list">${n.map(x=>`<div class="li"><span class="dot ${x.tone}"></span><span class="grow">${esc(x.text)}</span>${x.go?`<button class="btn small ghost" data-act="nav" data-arg="${x.go}">เปิด</button>`:""}</div>`).join("")}</div>`:`<p class="muted small" style="margin:0">ไม่มีเรื่องที่ต้องทำ</p>`}
+function pageJudgeHome(){
+  const j=CUR(),r=S.phase===4?S.result.res[j.id]:null;
+  const tenure=Math.min(100,j.months/RULES.T02.cap*100);
+  const reqBody=j.req.status==="submitted"?`${pill("ok","ยื่นแล้ว")} <span class="small muted">เมื่อ ${esc(j.req.at)}</span>`:j.req.status==="draft"?pill("warn","ร่าง ยังไม่ส่ง"):pill(mustMove(j)?"bad":"neutral","ยังไม่ยื่น");
+  return`<div class="pagehead"><div class="grow"><h1>สวัสดี ${esc(j.name)}</h1><p class="sub">${esc(posOf(j.court))} · ${esc(C[j.court].name)} · อาวุโสลำดับที่ ${fmt(j.sen)}</p></div>
+    ${S.phase===0?`<button class="btn primary" data-act="nav" data-arg="wish">${j.req.status==="submitted"?"แก้ไขคำขอ":"ยื่นความประสงค์"}</button>`:S.phase===4?`<button class="btn primary" data-act="nav" data-arg="result">ดูผลการโยกย้าย</button>`:""}</div>
+  ${r?`<div class="card hero" style="margin-bottom:16px;border-color:var(--ok)"><div class="grow"><span class="small muted">ผลการโยกย้าย มีผล 1 เม.ย. 2570</span><div class="big">${r.to&&r.to!==j.court?`ย้ายไป ${esc(C[r.to].name)}`:`อยู่ที่ ${esc(C[j.court].name)}`}</div></div>${pill(...statusOf(j))}</div>`:""}
+  <div class="card stack" style="margin-bottom:16px"><div class="row"><h2 class="grow">รอบการโยกย้าย 1 เมษายน 2570</h2>${S.phase===0?pill("info","เหลือ 7 วันก่อนปิดรับ"):""}</div>${phaseStepper()}</div>
+  <div class="grid2e">
+    <div class="stack">
+      <section class="card stack"><h2>สถานะวาระของฉัน</h2>
+        <div class="row">${mustMove(j)?pill("warn","ครบวาระ ต้องย้ายรอบนี้"):pill("info","ยังไม่ครบวาระ ขอย้ายได้")}</div>
+        <dl class="kv"><dt>ศาลปัจจุบัน</dt><dd>${esc(C[j.court].name)}</dd><dt>อยู่ใน จ.${esc(C[j.court].prov)}</dt><dd>${j.months} จาก ${RULES.T02.cap} เดือน</dd></dl>
+        <div class="bar"><i class="${mustMove(j)?"w":""}" style="width:${tenure}%"></i></div>
+        <button class="btn small" data-act="nav" data-arg="history" style="align-self:flex-start">ดูประวัติวาระทั้งหมด</button></section>
+      <section class="card stack"><h2>คำขอของฉัน</h2><div class="row">${reqBody}</div>
+        ${j.prefs.length?`<ol style="margin:0;padding-left:20px">${j.prefs.map(c=>`<li>${esc(C[c].name)}</li>`).join("")}</ol>`:`<p class="small muted" style="margin:0">ยังไม่ได้เลือกศาล</p>`}
+        ${j.req.special?`<div class="small"><span class="muted">เหตุผลประกอบ:</span> ${esc(j.req.special)}</div>`:""}
+        ${(j.req.docs||[]).map(d=>`<div class="doc"><span class="grow">📎 ${esc(d.name)}</span>${docPill(d)}</div>`).join("")}
+        <button class="btn small" data-act="open" data-arg="${j.id}" style="align-self:flex-start">ดูรายละเอียดคำขอ</button></section>
+    </div>
+    <section class="card stack"><h2>สิ่งที่ต้องทำและการแจ้งเตือน</h2>${noteList(notes())}</section>
+  </div>`;
+}
+
+function recFor(me){
+  return COURTS.filter(c=>c.id!==me.court).map(c=>{
+    const ch=check(me,c.id),blk=ch.some(x=>x.sev==="block");const reasons=[];let fit=0,total=0;
+    if(me.cond.near&&me.spouse){total++;const d=km(me.spouse.prov,c.prov);const sepOk=me.cond.sep==="prov"?c.prov!==me.spouse.prov:true;
+      if(d<=me.cond.km&&sepOk){fit++;reasons.push(["ok",`ห่างที่ทำงานคู่สมรส ${d} กม.`])}else reasons.push(["mid",`ห่างคู่สมรส ${d} กม.${d>me.cond.km?" (เกินที่ตั้งไว้)":sepOk?"":" (จังหวัดเดียวกัน)"}`]);
+      if(me.spouse.prov!==c.prov&&sepOk)reasons.push(["ok","คนละเขตอำนาจกับคู่สมรส"])}
+    if(me.mother&&me.cond.careNear!==false){total++;const d=km(me.mother,c.prov);if(d<=150){fit++;reasons.push(["ok",`ห่างผู้ที่ต้องดูแล ${d} กม.`])}else reasons.push(["mid",`ห่างผู้ที่ต้องดูแล ${d} กม.`])}
+    if(me.kids&&me.kids===c.prov)reasons.push(["ok","จังหวัดเดียวกับโรงเรียนบุตร"]);
+    ch.forEach(x=>reasons.push([x.sev==="block"?"bad":"warn",`${x.code} ${x.msg}`]));
+    const seniorWant=JUDGES.filter(j=>j.sen<me.sen&&sub(j).includes(c.id)).length;
+    return {c,blk,fit,total,reasons,seniorWant,dist:me.spouse?km(me.spouse.prov,c.prov):km(C[me.court].prov,c.prov)}
+  }).sort((a,b)=>(a.blk-b.blk)||(b.fit-a.fit)||(a.dist-b.dist));
+}
+const STEPS=["สถานการณ์ของคุณ","สิ่งที่สำคัญกับคุณ","ศาลที่เหมาะกับคุณ","ทบทวนและส่ง"];
+function pageWish(){
+  const j=CUR(),ro=S.phase!==0;
+  if(ro)return`<div class="pagehead"><div class="grow"><h1>ยื่นความประสงค์ย้าย</h1><p class="sub">ปิดรับคำขอแล้ว รอบนี้อยู่ขั้น "${esc(PH[S.phase])}"</p></div></div>
+    <div class="card stack"><div class="row">${reqPill(j)}</div>${j.prefs.length&&j.req.status==="submitted"?`<ol style="margin:0;padding-left:20px">${j.prefs.map(c=>`<li>${esc(C[c].name)}</li>`).join("")}</ol>`:`<p class="muted" style="margin:0">${j.req.status==="draft"?"ร่างคำขอไม่ได้ส่งก่อนปิดรับ จึงถือว่าไม่ได้ยื่นในรอบนี้":"ไม่ได้ยื่นคำขอในรอบนี้"}</p>`}
+    <button class="btn" data-act="nav" data-arg="result" style="align-self:flex-start">ดูความคืบหน้าผล</button></div>`;
+  const steps=`<div class="steps" role="list">${STEPS.map((s,i)=>`<button role="listitem" data-act="step" data-arg="${i}" class="${i<S.step?"done":""}" ${i===S.step?'aria-current="step"':""}><i>${i<S.step?"✓":i+1}</i>${s}</button>`).join("")}</div>`;
+  const nav=`<div class="row" style="margin-top:16px">${S.step>0?`<button class="btn" data-act="step" data-arg="${S.step-1}">ย้อนกลับ</button>`:""}<span class="grow"></span>
+    <button class="btn" data-act="savedraft">บันทึกร่าง</button>${S.step<3?`<button class="btn primary" data-act="step" data-arg="${S.step+1}">ถัดไป</button>`:`<button class="btn primary" data-act="submit" ${j.prefs.length?"":"disabled"}>${j.req.status==="submitted"?"ส่งคำขอที่แก้ไข":"ยืนยันและส่งคำขอ"}</button>`}</div>`;
+  const head=`<div class="pagehead"><div class="grow"><h1>ยื่นความประสงค์ย้าย</h1><p class="sub">รอบมีผล 1 เม.ย. 2570 · ปิดรับ 15 ม.ค. 2570 · ${j.req.status==="submitted"?"ส่งแล้ว แก้ไขได้จนถึงวันปิดรับ":"ทุกช่องในขั้นที่ 1–2 ข้ามได้"}</p></div>${reqPill(j)}</div>`;
+  return head+steps+[wishStep1,wishStep2,wishStep3,wishStep4][S.step](j)+nav;
+}
+const opt=(arr,v)=>arr.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("");
+function wishStep1(j){const provs=Object.keys(PROV);
+  return`<div class="grid2e">
+    <section class="card stack"><h2>ครอบครัว</h2>
+      <div class="row2"><label class="f">อาชีพคู่สมรส<select id="sjob">${opt(["ไม่มีคู่สมรส","อัยการ","ทนายความ","ผู้พิพากษา","อาชีพอื่น"],j.spouse?j.spouse.job:"ไม่มีคู่สมรส")}</select></label>
+      <label class="f">ที่ทำงานคู่สมรส<select id="sprov" ${j.spouse?"":"disabled"}>${opt(provs,j.spouse?j.spouse.prov:"ลำปาง")}</select></label></div>
+      <div class="row2"><label class="f">ผู้ที่ต้องดูแล (เช่น บิดามารดา) อยู่ที่<select id="mprov">${opt(["ไม่มี",...provs],j.mother||"ไม่มี")}</select></label>
+      <label class="f">บุตรเรียนอยู่ที่<select id="kprov">${opt(["ไม่มี",...provs],j.kids||"ไม่มี")}</select></label></div>
+      ${j.spouse&&j.spouse.job==="อัยการ"?`<div class="note warn">คู่สมรสเป็นอัยการ ระบบจะตัดศาลใน จ.${esc(j.spouse.prov)} ออกให้อัตโนมัติ (กฎ C-02)</div>`:""}
+      ${j.spouse&&j.spouse.job==="ผู้พิพากษา"?`<div class="note">คู่สมรสเป็นผู้พิพากษา คุณเลือกยื่นแบบคู่ได้ในขั้นสุดท้าย</div>`:""}</section>
+    <section class="card stack"><h2>ข้อมูลอื่นที่อยากให้รู้</h2>
+      <label class="switch"><input type="checkbox" id="health" ${j.health?"checked":""}><span><b>มีเรื่องสุขภาพที่ต้องรักษาต่อเนื่อง</b><br><span class="small muted">เช่น ต้องพบแพทย์เฉพาะทางเป็นประจำ</span></span></label>
+      <div class="note">ข้อมูลครอบครัวเห็นเฉพาะคุณ เจ้าหน้าที่ที่มีสิทธิ์ และ ก.ต. ใช้แนะนำศาลและตรวจผลประโยชน์ขัดกัน ไม่เปลี่ยนลำดับอาวุโส</div></section>
+  </div>`}
+function wishStep2(j){const ok=recFor(j).filter(r=>!r.blk&&r.total&&r.fit===r.total).length;
+  return`<div class="grid2e">
+    <section class="card stack"><h2>สิ่งที่สำคัญกับคุณ</h2>
+      <label class="switch"><input type="checkbox" id="near" ${j.cond.near?"checked":""} ${j.spouse?"":"disabled"}><span><b>อยู่ใกล้คู่สมรส แต่ไม่อยู่ที่เดียวกัน</b><br><span class="small muted">ระดับ: จำเป็น · ใช้หาที่ลงด้วยถ้าคุณครบวาระแต่ไม่ได้ตัวเลือก</span></span></label>
+      <label class="f">ระยะทางไม่เกิน <b id="kmv" style="color:var(--fg)">${j.cond.km} กม.</b><input type="range" id="km" min="40" max="300" step="10" value="${j.cond.km}" ${j.cond.near&&j.spouse?"":"disabled"}></label>
+      <label class="f">ไม่อยู่ที่เดียวกันหมายถึง<select id="sep" ${j.cond.near&&j.spouse?"":"disabled"}><option value="court" ${j.cond.sep==="court"?"selected":""}>คนละศาล</option><option value="prov" ${j.cond.sep==="prov"?"selected":""}>คนละจังหวัด (คนละเขตอำนาจ)</option></select></label>
+      <label class="switch"><input type="checkbox" id="care" ${j.cond.careNear!==false&&j.mother?"checked":""} ${j.mother?"":"disabled"}><span><b>อยู่ใกล้ผู้ที่ต้องดูแล ไม่เกิน 150 กม.</b><br><span class="small muted">ระดับ: สำคัญ</span></span></label>
+    </section>
+    <section class="card stack"><h2>ผลจากเงื่อนไขของคุณ</h2>
+      <div class="big">${ok} ศาล</div><p class="muted" style="margin:0">ตรงเงื่อนไขทุกข้อและไม่ติดกฎ จากทั้งหมด ${COURTS.length-1} ศาล</p>
+      <div class="note">ถ้าตั้งเงื่อนไขแคบเกินไปจนเหลือน้อย ลองขยายระยะทาง ระบบจะไม่บังคับใช้เงื่อนไขนี้กับการเลือกของคุณ แต่ใช้เรียงคำแนะนำ</div></section>
+  </div>`}
+function wishStep3(j){
+  const recs=recFor(j);
+  const choices=[0,1,2].map(i=>{const cid=j.prefs[i];if(!cid)return`<div class="choice empty"><div class="num">${i+1}</div><div class="grow">ยังไม่ได้เลือก · กด "เพิ่ม" จากรายการ</div></div>`;
+    const ch=check(j,cid);const b=ch.find(x=>x.sev==="block");
+    return`<div class="choice"><div class="num">${i+1}</div><div class="grow"><b>${esc(C[cid].name)}</b><div class="row" style="gap:6px;margin-top:2px">${b?pill("bad","ติดกฎ "+b.code):pill("ok","ผ่านกฎ")}<span class="small muted">${C[cid].seats} ที่นั่ง</span></div></div>
+      <button class="btn small icon" data-act="up" data-arg="${i}" ${i===0?"disabled":""} aria-label="เลื่อนขึ้น" title="เลื่อนขึ้น">↑</button>
+      <button class="btn small icon" data-act="rm" data-arg="${i}" aria-label="เอาออก" title="เอาออก">✕</button></div>`}).join("");
+  return`<div class="grid3">
+    <section class="stack">
+      <div class="note">เลือกตามใจจริงได้เลย ระบบจัดตามลำดับอาวุโส การใส่ศาลที่อยากได้ที่สุดไว้อันดับ 1 ไม่ทำให้เสียโอกาสในอันดับอื่น</div>
+      ${recs.map(r=>{const pi=j.prefs.indexOf(r.c.id);return`<article class="rec ${pi>=0?"picked":""} ${r.blk?"blocked":""}">
+        <div class="row"><div class="grow"><b>${esc(r.c.name)}</b><div class="small muted">ภาค ${r.c.region} · ${r.c.seats} ที่นั่ง · ผู้อาวุโสกว่าที่เลือกศาลนี้ ${r.seniorWant} คน</div></div>
+        ${r.blk?pill("bad","เลือกไม่ได้"):r.total?pill(r.fit===r.total?"ok":r.fit?"warn":"neutral",`ตรง ${r.fit}/${r.total}`):""}
+        ${pi>=0?pill("info","อันดับ "+(pi+1)):`<button class="btn small" data-act="add" data-arg="${r.c.id}" ${r.blk||j.prefs.length>=3?"disabled":""}>เพิ่ม</button>`}</div>
+        <div class="reasons">${r.reasons.map(([t,s])=>`<span class="r-${t}">${t==="ok"?"✓":t==="bad"?"✕":t==="warn"?"!":"•"} ${esc(s)}</span>`).join("")}</div></article>`}).join("")}
+    </section>
+    <section class="card stack picks"><h2>ความประสงค์ของฉัน</h2>${choices}<p class="small muted" style="margin:0">ระยะทางเป็นค่าประมาณจากพิกัดจังหวัด</p></section>
+  </div>`}
+function wishStep4(j){
+  const sp=j.spouse&&j.spouse.link?J[j.spouse.link]:null;
+  return`<div class="grid2e">
+    <section class="card stack"><h2>สรุปคำขอ</h2>
+      ${j.prefs.length?j.prefs.map((c,i)=>`<div class="choice"><div class="num">${i+1}</div><div class="grow"><b>${esc(C[c].name)}</b><div class="small muted">${esc(posOf(c))} · ภาค ${C[c].region}</div></div></div>`).join(""):`<div class="note bad">ยังไม่ได้เลือกศาล กลับไปขั้นที่ 3</div>`}
+      <dl class="kv"><dt>คู่สมรส</dt><dd>${j.spouse?`${esc(j.spouse.job)} · จ.${esc(j.spouse.prov)}`:"ไม่มี"}</dd>
+        <dt>ผู้ที่ต้องดูแล</dt><dd>${j.mother?"จ."+esc(j.mother):"ไม่มี"}</dd><dt>บุตรเรียน</dt><dd>${j.kids?"จ."+esc(j.kids):"ไม่มี"}</dd>
+        <dt>เงื่อนไขจำเป็น</dt><dd>${j.cond.near&&j.spouse?`ใกล้คู่สมรส ≤ ${j.cond.km} กม. ${j.cond.sep==="prov"?"คนละจังหวัด":"คนละศาล"}`:"ไม่มี"}</dd></dl>
+      <label class="switch"><input type="checkbox" id="fallback" ${j.req.fallback?"checked":""}><span><b>ถ้าครบวาระแต่ไม่ได้ทั้ง 3 ที่ ให้ใช้เงื่อนไขจำเป็นหาที่ลงก่อน</b><br><span class="small muted">เจ้าหน้าที่จะยืนยันอีกครั้ง</span></span></label>
+      ${sp?`<label class="switch"><input type="checkbox" id="couple" ${j.req.couple?"checked":""}><span><b>ยื่นแบบคู่กับ ${esc(sp.name)}</b><br><span class="small muted">ระบบจะพยายามจัดให้ห่างกันไม่เกิน ${j.cond.km} กม. แต่ไม่อยู่ศาลเดียวกัน และแจ้งเจ้าหน้าที่ถ้าทำไม่ได้</span></span></label>`:""}
+    </section>
+    <section class="card stack"><h2>เหตุผลประกอบถึงเจ้าหน้าที่และ ก.ต.</h2>
+      <label class="f">เล่าสั้น ๆ (ไม่บังคับ)<textarea id="reason" placeholder="เช่น ภรรยาเป็นอัยการที่ลำปาง อยากอยู่ใกล้กันแต่ไม่อยู่ในเขตอำนาจเดียวกัน และต้องดูแลมารดาที่พะเยา">${esc(j.req.reason||j.req.special||"")}</textarea></label>
+      <div class="stack" style="gap:6px">${(j.req.docs||[]).map((d,i)=>`<div class="doc"><span class="grow">📎 ${esc(d.name)}</span>${docPill(d)}<button class="btn small icon ghost" data-act="rmdoc" data-arg="${i}" aria-label="เอาเอกสารออก">✕</button></div>`).join("")}
+        <button class="btn small" data-act="adddoc" style="align-self:flex-start">+ แนบเอกสาร (จำลอง)</button></div>
+      <p class="small muted" style="margin:0">เอกสารแนบจะส่งให้เจ้าหน้าที่ภาคตรวจก่อนเสนอ ก.ต.</p>
+    </section>
+  </div>`}
+
+function pageResult(){
+  const j=CUR();
+  if(S.phase<4)return`<div class="pagehead"><div class="grow"><h1>ผลการโยกย้าย</h1><p class="sub">ผลจะประกาศหลัง ก.ต. อนุมัติ</p></div></div>
+    <div class="card stack">${phaseStepper()}<div class="note">ตอนนี้อยู่ขั้น "${esc(PH[S.phase])}" ${S.phase>=2?"ระบบจัดวางร่างแล้ว อยู่ระหว่างตรวจทาน ผลรายบุคคลยังไม่เปิดเผย":"ยังไม่ได้เริ่มจัดวาง"}</div></div>`;
+  const r=S.result.res[j.id];
+  return`<div class="pagehead"><div class="grow"><h1>ผลการโยกย้าย</h1><p class="sub">ก.ต. อนุมัติแล้ว · มีผล 1 เมษายน 2570</p></div></div>
+    <div class="card hero" style="margin-bottom:16px;border-color:var(--ok)"><div class="grow"><span class="small muted">ตำแหน่งใหม่</span>
+      <div class="big">${r.to&&r.to!==j.court?esc(C[r.to].name):"อยู่ตำแหน่งเดิม"}</div>
+      <div class="muted">${esc(posOf(r.to||j.court))}${r.to&&r.to!==j.court?` · ย้ายจาก ${esc(C[j.court].name)}`:` · ${esc(C[j.court].name)}`}</div></div>${pill(...statusOf(j))}</div>
+    <div class="grid2e"><section class="card stack"><h2>ทำไมได้ผลนี้</h2>${explain(j).map(s=>`<div class="step">${pill(s.tone,s.head)}<span>${esc(s.body)}</span></div>`).join("")}</section>
+      <section class="card stack"><h2>ขั้นต่อไป</h2><div class="list">
+        <div class="li"><span class="dot"></span><span class="grow">รายงานตัวที่ศาลใหม่ภายใน 1 เม.ย. 2570</span></div>
+        <div class="li"><span class="dot"></span><span class="grow">ส่งมอบสำนวนค้างตามแบบที่สำนักงานศาลฯ กำหนด</span></div>
+        <div class="li"><span class="dot"></span><span class="grow">ถ้ามีข้อสงสัยเรื่องผล ยื่นคำร้องผ่านสำนักอธิบดีภาคได้</span></div></div></section></div>`;
+}
+function pageHistory(){
+  const j=CUR();const rows=[...j.past.map(p=>({c:p.c,m:p.m,y:p.y})).sort((a,b)=>b.y-a.y),{c:j.court,m:j.months,cur:true}];
+  const provs=[...new Set(rows.map(r=>C[r.c].prov))];
+  return`<div class="pagehead"><div class="grow"><h1>ประวัติวาระ</h1><p class="sub">ข้อมูลจากทะเบียนประวัติ ใช้คำนวณวาระสะสมต่อจังหวัดและกฎห้ามกลับศาลเดิม</p></div></div>
+  <div class="grid2e">
+    <div class="tablewrap"><table><thead><tr><th>ศาล</th><th>ระยะเวลา</th><th>ช่วง</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td><b>${esc(C[r.c].name)}</b>${r.cur?' <span class="pill info">ปัจจุบัน</span>':""}</td><td>${r.m} เดือน</td><td class="muted">${r.cur?"ปัจจุบัน":`สิ้นสุดเมื่อ ${r.y} ปีก่อน`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <section class="card stack"><h2>วาระสะสมต่อจังหวัด</h2>
+      ${provs.map(p=>{const m=provMonths(j,p);const pc=Math.min(100,m/RULES.T02.cap*100);return`<div><div class="row"><span class="grow">จ.${esc(p)}</span><span class="small ${m>=RULES.T02.cap?"r-bad":"muted"}">${m} / ${RULES.T02.cap} เดือน</span></div><div class="bar"><i class="${m>=RULES.T02.cap?"b":pc>80?"w":""}" style="width:${pc}%"></i></div></div>`}).join("")}
+      <p class="small muted" style="margin:0">จังหวัดที่ครบ ${RULES.T02.cap} เดือนจะเลือกไม่ได้ (กฎ T-03)</p></section>
+  </div>`;
+}
+
+/* =========================================================
+   Regional staff pages
+   ========================================================= */
+function pageRegionHome(){
+  const rj=JUDGES.filter(j=>inRegion(j,5));
+  const sub_=rj.filter(j=>j.req.status==="submitted").length,dr=rj.filter(j=>j.req.status==="draft").length,forced=rj.filter(mustMove);
+  const miss=forced.filter(j=>j.req.status!=="submitted");
+  const pd=rj.filter(pendingDocs);
+  const courts=COURTS.filter(c=>c.region===5);
+  return`<div class="pagehead"><div class="grow"><h1>ภาพรวมภาค 5</h1><p class="sub">สำนักอธิบดีผู้พิพากษาภาค 5 · 8 จังหวัด · ${courts.length} ศาล · ${rj.length} คน</p></div></div>
+  <div class="stats">
+    <button class="stat" data-act="rgo" data-arg="sub"><b>${sub_}</b><span>ส่งคำขอแล้ว จาก ${rj.length} คน</span></button>
+    <button class="stat" data-act="rgo" data-arg="draft"><b style="color:var(--warn)">${dr}</b><span>มีร่างแต่ยังไม่ส่ง</span></button>
+    <button class="stat" data-act="rgo" data-arg="forced"><b>${forced.length}</b><span>ครบวาระ ต้องย้าย</span></button>
+    <button class="stat" data-act="rgo" data-arg="notyet"><b style="color:var(--bad)">${miss.length}</b><span>ยังไม่ส่ง</span></button>
+    <button class="stat" data-act="rgo" data-arg="docs"><b style="color:var(--warn)">${pd.length}</b><span>เอกสารรอตรวจ</span></button>
+  </div>
+  <div class="grid2e" style="margin-bottom:16px">
+    <section class="card stack"><div class="row"><h2 class="grow">ครบวาระแต่ยังไม่ส่งคำขอ</h2>${S.phase===0&&miss.some(j=>!S.reminded[j.id])?`<button class="btn small" data-act="remindall">แจ้งเตือนทั้งหมด</button>`:""}</div>
+      ${miss.length?`<div class="list">${miss.map(j=>`<div class="li"><span class="grow"><b><a href="#" data-act="open" data-arg="${j.id}" style="color:inherit">${esc(j.name)}</a></b><br><span class="small muted">#${fmt(j.sen)} · ${esc(C[j.court].name)} · ${j.months} เดือน</span></span>${reqPill(j)}
+        ${S.reminded[j.id]?pill("info","แจ้งเตือนแล้ว"):S.phase===0?`<button class="btn small" data-act="remind" data-arg="${j.id}">แจ้งเตือน</button>`:""}</div>`).join("")}</div>`:`<p class="muted" style="margin:0">ทุกคนที่ครบวาระส่งคำขอแล้ว</p>`}
+      <p class="small muted" style="margin:0">ถ้าไม่ส่งภายในวันปิดรับ ระบบจะหาที่ลงให้จากที่นั่งที่เหลือ</p></section>
+    <section class="card stack"><h2>เอกสารรอตรวจ</h2>
+      ${pd.length?`<div class="list">${pd.map(j=>`<div class="li"><span class="grow"><b><a href="#" data-act="open" data-arg="${j.id}" style="color:inherit">${esc(j.name)}</a></b><br><span class="small muted">${esc(j.req.special||j.req.reason||"")}</span></span><button class="btn small" data-act="openreview" data-arg="${j.id}">ตรวจ</button></div>`).join("")}</div>`:`<p class="muted" style="margin:0">ไม่มีเอกสารค้างตรวจ</p>`}</section>
+  </div>
+  <h2 style="margin-bottom:10px">ความต้องการรายศาล <span class="small muted" style="font-weight:400">คลิกเพื่อดูที่นั่งในผังศาล</span></h2>
+  <div class="tablewrap"><table class="click"><thead><tr><th>ศาล</th><th>ที่นั่ง</th><th>ว่างอยู่</th><th>ครบวาระ</th><th>เลือกเป็นอันดับ 1</th><th></th></tr></thead><tbody>
+    ${courts.map(c=>{const h=JUDGES.filter(j=>j.court===c.id);const vac=c.seats-h.length;const f=h.filter(mustMove).length;const d=JUDGES.filter(j=>sub(j)[0]===c.id).length;
+      return`<tr data-act="court" data-arg="${c.id}"><td><b>${esc(c.name)}</b></td><td class="n">${c.seats}</td><td class="n">${vac}</td><td class="n">${f}</td><td class="n">${d}</td><td>${d>vac+f?pill("bad","แข่งขันสูง"):vac+f>d?pill("warn","อาจขาดคน"):pill("ok","สมดุล")}</td></tr>`}).join("")}
+  </tbody></table></div>`;
+}
+function pageReview(){
+  const rj=JUDGES.filter(j=>inRegion(j,5));
+  const F={all:"ทั้งหมด",docs:"เอกสารรอตรวจ",special:"มีเหตุผลพิเศษ",forced:"ครบวาระ",notyet:"ยังไม่ส่ง",draft:"มีร่าง",sub:"ส่งแล้ว"};
+  const rows=rj.filter(j=>S.rfilter==="all"||(S.rfilter==="docs"&&pendingDocs(j))||(S.rfilter==="special"&&j.req.special)||(S.rfilter==="forced"&&mustMove(j))||(S.rfilter==="draft"&&j.req.status==="draft")||(S.rfilter==="notyet"&&j.req.status!=="submitted")||(S.rfilter==="sub"&&j.req.status==="submitted"));
+  const sel=rows.find(j=>j.id===S.sel)||rows.find(pendingDocs)||rows[0]||rj[0];
+  const ch=sel.prefs.map(c=>({c,x:check(sel,c)}));
+  return`<div class="pagehead"><div class="grow"><h1>ตรวจสอบคำขอ</h1><p class="sub">ภาค 5 · ยืนยันข้อเท็จจริงและเอกสารก่อนส่งให้ส่วนกลางจัดวาง · คลิกแถวเพื่อดูรายละเอียด</p></div></div>
+  <div class="grid2">
+    <div><div class="filters">${Object.entries(F).map(([k,v])=>`<button data-act="rfilter" data-arg="${k}" aria-pressed="${S.rfilter===k}">${v}</button>`).join("")}</div>
+      <div class="tablewrap"><table class="click"><thead><tr><th>อาวุโส</th><th>ชื่อ</th><th>ศาลปัจจุบัน</th><th>คำขอ</th><th>เอกสาร</th></tr></thead><tbody>
+      ${rows.map(j=>`<tr data-act="selr" data-arg="${j.id}" class="${j.id===sel.id?"sel":""}"><td class="n">#${fmt(j.sen)}</td><td>${esc(j.name)}${mustMove(j)?' <span class="pill warn">ครบวาระ</span>':""}</td><td>${esc(C[j.court].name)}</td><td>${reqPill(j)}</td>
+        <td>${(j.req.docs||[]).length?docPill(j.req.docs.find(d=>d.status!=="ok")||j.req.docs[0]):'<span class="faint">–</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="empty-state">ไม่มีรายการในตัวกรองนี้</td></tr>`}
+      </tbody></table></div></div>
+    <aside class="card stack">
+      <div><b>${esc(sel.name)}</b><div class="small muted">#${fmt(sel.sen)} · ${esc(C[sel.court].name)} · ${sel.months} เดือน</div></div>
+      <div class="row">${reqPill(sel)}${mustMove(sel)?pill("warn","ครบวาระ"):""}${sel.req.couple?pill("gold","ยื่นแบบคู่"):""}</div>
+      <dl class="kv"><dt>คู่สมรส</dt><dd>${sel.spouse?`${esc(sel.spouse.job)} · จ.${esc(sel.spouse.prov)}`:"ไม่มี"}</dd><dt>ภูมิลำเนา</dt><dd>จ.${esc(sel.dom)}</dd></dl>
+      ${sel.prefs.length?`<div class="stack" style="gap:6px">${ch.map((x,i)=>`<div class="step"><b>${i+1}. ${esc(C[x.c].name)}</b>${x.x.length?x.x.map(y=>`<span class="${y.sev==="block"?"r-bad":"r-warn"}">${y.sev==="block"?"✕":"!"} ${y.code} ${esc(y.msg)}</span>`).join(""):'<span class="r-ok">✓ ผ่านกฎ</span>'}</div>`).join("")}</div>`:`<p class="muted small" style="margin:0">ยังไม่ได้เลือกศาล</p>`}
+      ${sel.req.special||sel.req.reason?`<div class="note">${esc(sel.req.special||sel.req.reason)}</div>`:""}
+      ${(sel.req.docs||[]).map((d,i)=>`<div class="doc" style="flex-wrap:wrap"><span class="grow">📎 ${esc(d.name)}${d.note?`<br><span class="small muted">${esc(d.note)}</span>`:""}</span>${docPill(d)}
+        ${d.status!=="ok"?`<button class="btn small" data-act="docok" data-arg="${sel.id}:${i}">ยืนยัน</button>`:""}${d.status==="pending"?`<button class="btn small danger" data-act="docmore" data-arg="${sel.id}:${i}">ขอเพิ่ม</button>`:""}</div>`).join("")}
+      ${sel.req.status!=="submitted"&&S.phase===0?(S.reminded[sel.id]?pill("info","แจ้งเตือนแล้ว"):`<button class="btn" data-act="remind" data-arg="${sel.id}">ส่งแจ้งเตือนให้ยื่นคำขอ</button>`):""}
+      <button class="btn primary" data-act="open" data-arg="${sel.id}">เปิดคำขอฉบับเต็ม</button>
+      <p class="small muted" style="margin:0">เจ้าหน้าที่ภาคเห็นข้อมูลครอบครัวเฉพาะผู้พิพากษาในภาคของตน</p>
+    </aside>
+  </div>`;
+}
+
+/* =========================================================
+   Org chart (shared)
+   ========================================================= */
+function pageOrg(){
+  const regions=S.user.role==="region"?[5]:[5,6];const R=S.phase>=2?S.result:null;
+  const demand=cid=>JUDGES.filter(j=>sub(j)[0]===cid).length;
+  const body=regions.map(rg=>{
+    const provs=Object.keys(PROV).filter(p=>PROV[p][2]===rg);
+    return`<div class="region-h"><h2>ภาค ${rg}</h2><span class="small muted">${rg===5?"สำนักอธิบดีผู้พิพากษาภาค 5 · ภาคเหนือตอนบน":"สำนักอธิบดีผู้พิพากษาภาค 6 · ภาคเหนือตอนล่าง"}</span></div>
+    <div class="prov">${provs.map(p=>{const cs=COURTS.filter(c=>c.prov===p);return`<section class="card"><h3>จ.${esc(p)}</h3>
+      ${cs.map(c=>{const holders=JUDGES.filter(j=>j.court===c.id);const vac=c.seats-holders.length;const forced=holders.filter(mustMove).length;
+        const inc=R?JUDGES.filter(j=>R.res[j.id].to===c.id&&j.court!==c.id):[];const out=R?holders.filter(j=>R.res[j.id].to!==c.id):[];
+        return`<details class="court" ${S.openCourt===c.id?"open":""}><summary><span class="grow"><b>${esc(c.name)}</b><br><span class="small muted">${c.seats} ที่นั่ง · ว่าง ${vac} · ครบวาระ ${forced} · อันดับ 1: ${demand(c.id)}</span></span>
+          ${R?pill(inc.length||out.length?"info":"neutral",`เข้า ${inc.length} ออก ${out.length}`):pill(demand(c.id)>vac+forced?"bad":"ok",demand(c.id)>vac+forced?"แข่งขันสูง":"ปกติ")}</summary>
+          <div class="seats">${holders.map(j=>{const leaving=R&&R.res[j.id].to!==c.id;
+            return`<div class="seat" data-act="open" data-arg="${j.id}" title="เปิดคำขอ"><span class="grow">${esc(j.name)} <span class="muted">#${fmt(j.sen)} · ${j.months} เดือน</span></span>${leaving?pill("warn","ย้ายออก"):mustMove(j)?pill("warn","ครบวาระ"):""}</div>`}).join("")}
+          ${inc.map(j=>`<div class="seat" data-act="open" data-arg="${j.id}" title="เปิดคำขอ"><span class="grow">${esc(j.name)} <span class="muted">#${fmt(j.sen)} · จาก ${esc(C[j.court].name)}</span></span>${pill("ok","ย้ายเข้า")}</div>`).join("")}
+          ${Array.from({length:Math.max(0,c.seats-holders.length-inc.length+out.length)}).map(()=>`<div class="seat vac">ตำแหน่งว่าง</div>`).join("")}</div></details>`}).join("")}
+      </section>`}).join("")}</div>`}).join("");
+  return`<div class="pagehead"><div class="grow"><h1>${S.user.role==="region"?"ที่นั่งในภาค 5":"ที่นั่งรอบนี้"}</h1><p class="sub">คลิกชื่อศาลเพื่อดูที่นั่ง ${R?"· แสดงผลหลังจัดวาง":"· ยังไม่ได้จัดวาง"}</p></div></div>
+    <div class="tree"><span>ศาลยุติธรรม</span>›<span>ศาลชั้นต้น</span>›<b style="color:var(--fg)">ภาค ${regions.join(", ")}</b>›<span>จังหวัด</span>›<span>ศาล</span></div>${body}`;
+}
+
+/* =========================================================
+   Central staff pages
+   ========================================================= */
+const PHASE_ACT=[
+  ["closeround","ปิดรับคำขอ","คำขอที่ยังเป็นร่างจะถือว่าไม่ได้ยื่น"],
+  ["startmatch","เริ่มจัดวาง","รันการจัดวางตามอาวุโสและกฎ ได้ร่างผลทันที"],
+  ["sendkt","เสนอ ก.ต.","ส่งร่างบัญชีพร้อมรายงานความยุติธรรม"],
+  [null,"รอ ก.ต. พิจารณา","เข้าเป็นกรรมการ ก.ต. เพื่ออนุมัติหรือส่งกลับ"],
+  [null,"ประกาศผลแล้ว","ผู้พิพากษาเห็นผลของตนพร้อมเหตุผล"]];
+function pageCentralHome(){
+  const all=JUDGES,submitted=all.filter(j=>j.req.status==="submitted").length,forced=all.filter(mustMove).length;
+  const [act,label,desc]=PHASE_ACT[S.phase];
+  const byR=[5,6].map(rg=>{const rj=all.filter(j=>inRegion(j,rg));return{rg,n:rj.length,s:rj.filter(j=>j.req.status==="submitted").length,f:rj.filter(mustMove).length,fm:rj.filter(j=>mustMove(j)&&j.req.status!=="submitted").length}});
+  return`<div class="pagehead"><div class="grow"><h1>ภาพรวมรอบการโยกย้าย</h1><p class="sub">รอบมีผล 1 เมษายน 2570 · ${COURTS.length} ศาล · ${all.length} คน</p></div>
+    <button class="btn small ghost" data-act="reset">รีเซ็ตเดโม</button></div>
+  ${S.ktNote&&S.phase===2?`<div class="note bad" style="margin-bottom:16px"><b>ก.ต. ส่งกลับให้แก้ไข:</b> ${esc(S.ktNote)}</div>`:""}
+  <section class="card stack" style="margin-bottom:16px">${phaseStepper()}
+    <div class="row" style="border-top:1px solid var(--line);padding-top:12px"><div class="grow"><b>ขั้นต่อไป: ${esc(label)}</b><div class="small muted">${esc(desc)}</div></div>
+      ${act?`<button class="btn primary" data-act="${act}">${esc(label)}</button>`:S.phase===3?`<button class="btn" data-act="switch" data-arg="kt">เข้าเป็น ก.ต.</button>`:`<button class="btn" data-act="switch" data-arg="judge">ดูผลในมุมผู้พิพากษา</button>`}</div></section>
+  <div class="stats">
+    <button class="stat" data-act="reqs" data-arg="status:submitted"><b>${submitted}</b><span>ส่งคำขอแล้ว จาก ${all.length} คน</span></button>
+    <button class="stat" data-act="reqs" data-arg="flag:forced"><b>${forced}</b><span>ครบวาระ ต้องย้าย</span></button>
+    <button class="stat" data-act="reqs" data-arg="flag:docs"><b style="color:var(--warn)">${all.filter(pendingDocs).length}</b><span>เอกสารที่ภาคยังไม่ตรวจ</span></button>
+    ${S.result?`<div class="stat"><b style="color:var(--ok)">${all.filter(j=>["pref","lock"].includes(S.result.res[j.id].kind)&&S.result.res[j.id].to!==j.court).length}</b><span>ได้ย้ายในร่างล่าสุด</span></div>
+    <div class="stat"><b style="color:${S.result.envy?"var(--bad)":"var(--ok)"}">${S.result.envy||"ผ่าน"}</b><span>ตรวจความยุติธรรม</span></div>`:""}
+  </div>
+  <div class="grid2e">
+    <section class="card stack"><h2>ความคืบหน้ารายภาค</h2>
+      ${byR.map(x=>`<div><div class="row"><b class="grow"><a href="#" data-act="reqs" data-arg="region:${x.rg}" style="color:inherit">ภาค ${x.rg} ›</a></b><span class="small muted">ส่งแล้ว ${x.s}/${x.n} · ครบวาระยังไม่ส่ง ${x.fm}</span></div><div class="bar" style="margin-top:4px"><i style="width:${x.s/x.n*100}%"></i></div></div>`).join("")}</section>
+    <section class="card stack"><div class="row"><h2 class="grow">ความเคลื่อนไหวล่าสุด</h2><button class="btn small ghost" data-act="nav" data-arg="log">ทั้งหมด</button></div>
+      <div class="list log">${S.log.slice(-5).reverse().map(l=>`<div class="li"><time>${esc(l.t)}</time><span class="grow"><b>${esc(l.who)}</b> ${esc(l.what)}</span></div>`).join("")}</div></section>
+  </div>`;
+}
+function pageRun(){
+  const canEdit=S.user.role==="central"&&S.phase===2;
+  if(!S.result)return`<div class="pagehead"><div class="grow"><h1>ผลการจัดวาง</h1><p class="sub">${JUDGES.length} คน · ${COURTS.length} ศาล</p></div></div>
+    <div class="card empty-state">ยังไม่ได้จัดวาง ${S.phase===0?'ปิดรับคำขอก่อน แล้วกด "เริ่มจัดวาง" ที่หน้าภาพรวมรอบ':'กด "เริ่มจัดวาง" ที่หน้าภาพรวมรอบ'}<br><br><button class="btn primary" data-act="nav" data-arg="chome">ไปหน้าภาพรวมรอบ</button></div>`;
+  const all=JUDGES,R=S.result.res;
+  const k=j=>R[j.id].kind;
+  const F={all:"ทั้งหมด",moved:"ได้ย้าย",auto:"ต้องยืนยัน",lock:"ล็อกแล้ว",stay:"อยู่ที่เดิม",forced:"ครบวาระ"};
+  const rows=all.filter(j=>S.filter==="all"||(S.filter==="moved"&&k(j)==="pref")||(S.filter==="auto"&&["auto","none"].includes(k(j)))||(S.filter==="lock"&&k(j)==="lock")||(S.filter==="stay"&&k(j)==="stay")||(S.filter==="forced"&&mustMove(j)));
+  const sel=J[S.sel]||all.find(j=>k(j)==="auto")||all[0];const r=R[sel.id];
+  const ci=coupleIssues();
+  const lockSel=canEdit?`<div class="stack" style="gap:6px;border-top:1px solid var(--line);padding-top:12px"><b>ปรับผลรายนี้</b>
+      ${r.kind==="auto"?`<button class="btn primary" data-act="confirm" data-arg="${sel.id}">ยืนยันข้อเสนอ ${esc(C[r.to].name)}</button>`:""}
+      ${S.locks[sel.id]?`<button class="btn" data-act="unlock" data-arg="${sel.id}">ปลดล็อก ให้ระบบจัดเอง</button>`:`<div class="row" style="flex-wrap:nowrap"><select id="lockto" aria-label="เลือกศาลที่จะล็อก">${COURTS.map(c=>{const b=blocked(sel,c.id);return`<option value="${c.id}" ${b?"disabled":""} ${c.id===(r.to||sel.court)?"selected":""}>${esc(c.name)}${b?" (ติดกฎ)":""}</option>`}).join("")}</select><button class="btn" data-act="lock" data-arg="${sel.id}">ล็อก</button></div>
+      <span class="small muted">ล็อกแล้วระบบจัดคนอื่นใหม่ทันที ศาลที่ติดกฎเลือกไม่ได้</span>`}</div>`:"";
+  return`<div class="pagehead"><div class="grow"><h1>ผลการจัดวาง</h1><p class="sub">ร่างล่าสุด ${esc(S.result.at)} · เรียงตามอาวุโส · คลิกแถวเพื่อดูเหตุผล${canEdit?"และปรับผล":""}</p></div>
+    ${canEdit?`<button class="btn" data-act="rerun">คำนวณใหม่</button><button class="btn primary" data-act="sendkt">เสนอ ก.ต.</button>`:pill("neutral",S.phase>=3?"ส่ง ก.ต. แล้ว แก้ไขไม่ได้":"ดูอย่างเดียว")}</div>
+  <div class="stats">
+    <button class="stat" data-act="reqs" data-arg="status:submitted"><b>${all.filter(j=>j.req.status==="submitted").length}</b><span>ยื่นคำขอ จาก ${all.length} คน</span></button>
+    <button class="stat" data-act="filter" data-arg="moved"><b style="color:var(--ok)">${all.filter(j=>k(j)==="pref").length}</b><span>ได้ย้ายตามที่ขอ (อันดับ 1: ${all.filter(j=>k(j)==="pref"&&R[j.id].rank===1).length})</span></button>
+    <button class="stat" data-act="filter" data-arg="auto"><b style="color:var(--warn)">${all.filter(j=>["auto","none"].includes(k(j))).length}</b><span>ระบบเสนอ รอยืนยัน</span></button>
+    <button class="stat" data-act="filter" data-arg="lock"><b style="color:var(--accent)">${all.filter(j=>k(j)==="lock").length}</b><span>ล็อกโดยเจ้าหน้าที่</span></button>
+    <div class="stat"><b style="color:${S.result.envy?"var(--bad)":"var(--ok)"}">${S.result.envy||"ผ่าน"}</b><span>ตรวจความยุติธรรมตามอาวุโส</span></div>
+  </div>
+  ${ci.filter(c=>!c.ok).map(c=>`<div class="note warn" style="margin-bottom:12px">ยื่นแบบคู่: ${esc(J[c.a].name)} ได้ ${esc(C[c.ta].name)} และ ${esc(J[c.b].name)} ได้ ${esc(C[c.tb].name)} ${c.same?"เป็นศาลเดียวกัน":`ห่างกัน ${c.d} กม. เกินที่ขอ ${c.max} กม.`} · ${canEdit?"ลองล็อกคนใดคนหนึ่งแล้วคำนวณใหม่":""}</div>`).join("")}
+  ${ci.filter(c=>c.ok).map(c=>`<div class="note ok" style="margin-bottom:12px">ยื่นแบบคู่: ${esc(J[c.a].name)} และ ${esc(J[c.b].name)} อยู่ห่างกัน ${c.d} กม. คนละศาล ตรงตามที่ขอ</div>`).join("")}
+  <div class="grid2">
+    <div><div class="filters">${Object.entries(F).map(([x,v])=>`<button data-act="filter" data-arg="${x}" aria-pressed="${S.filter===x}">${v}</button>`).join("")}</div>
+      <div class="tablewrap"><table class="click"><thead><tr><th>อาวุโส</th><th>ชื่อ</th><th>จาก</th><th>ไป</th><th>สถานะ</th></tr></thead><tbody>
+      ${rows.map(j=>{const rr=R[j.id],[t,l]=statusOf(j);return`<tr data-act="sel" data-arg="${j.id}" class="${j.id===sel.id?"sel":""}"><td class="n">#${fmt(j.sen)}</td>
+        <td>${esc(j.name)}${mustMove(j)?' <span class="pill warn">ครบวาระ</span>':""}${j.req.special?' <span class="pill gold">เหตุผลพิเศษ</span>':""}</td>
+        <td>${esc(C[j.court].name)}</td><td>${rr.to&&rr.to!==j.court?esc(C[rr.to].name):"–"}</td><td>${pill(t,l)}</td></tr>`}).join("")||`<tr><td colspan="5" class="empty-state">ไม่มีรายการในตัวกรองนี้</td></tr>`}
+      </tbody></table></div></div>
+    <aside class="card stack" aria-live="polite">
+      <h2>เหตุผลการจัดวาง</h2>
+      <div><b>${esc(sel.name)}</b><div class="small muted">อาวุโส #${fmt(sel.sen)} · ${esc(C[sel.court].name)} · ${sel.months} เดือน · คำขอ: ${sel.req.status==="submitted"?"ส่งแล้ว":sel.req.status==="draft"?"ร่าง (ไม่นับ)":"ไม่ได้ยื่น"}</div></div>
+      ${sel.req.special?`<div class="note">${esc(sel.req.special)}${(sel.req.docs||[]).length?` · เอกสาร: ${sel.req.docs.map(d=>DOCP[d.status][1]).join(", ")}`:""}</div>`:""}
+      ${explain(sel).map(s=>`<div class="step">${pill(s.tone,s.head)}<span>${esc(s.body)}</span></div>`).join("")}
+      <button class="btn small" data-act="open" data-arg="${sel.id}" style="align-self:flex-start">เปิดคำขอฉบับเต็ม</button>
+      ${lockSel}
+    </aside>
+  </div>`;
+}
+function pageRules(){
+  const forced=JUDGES.filter(mustMove).length;const ro=S.phase>=3;
+  const hits=code=>{let n=0;for(const j of JUDGES)for(const c of sub(j))if(check(j,c).some(x=>x.code===code))n++;return n};
+  const sw=(id,on)=>`<label class="switch"><input type="checkbox" id="${id}" ${on?"checked":""} ${ro?"disabled":""} aria-label="เปิดใช้กฎ"></label>`;
+  return`<div class="pagehead"><div class="grow"><h1>กฎและข้อจำกัด</h1><p class="sub">ปรับได้โดยไม่ต้องแก้โปรแกรม ผลกระทบคำนวณจากคำขอในรอบนี้ทันที ป้าย "รอยืนยัน" คือยังไม่ได้ตรวจกับระเบียบ ก.ต. ฉบับเต็ม</p></div>
+    ${ro?pill("neutral","ล็อกหลังเสนอ ก.ต."):`<button class="btn" data-act="resetrules">คืนค่าเริ่มต้น</button>`}</div>
+  ${S.phase===2?`<div class="note" style="margin-bottom:12px">อยู่ขั้นจัดวาง เปลี่ยนกฎแล้วร่างผลจะคำนวณใหม่อัตโนมัติ</div>`:""}
+  <div class="card">
+    <div class="rule"><span class="code">T-02</span><div class="grow"><b>ครบวาระสะสมต่อจังหวัดต้องย้าย</b><div class="small muted">ตารางวาระ ก.ต. ฉบับที่ 15/2565 · ตอนนี้ต้องย้าย ${forced} คน</div>
+      <label class="f" style="max-width:200px;margin-top:6px">เพดาน (เดือน)<input type="number" id="cap" min="12" max="120" value="${RULES.T02.cap}" ${ro?"disabled":""}></label></div>${sw("t02",RULES.T02.on)}</div>
+    <div class="rule"><span class="code">T-03</span><div class="grow"><b>ห้ามเลือกจังหวัดที่วาระสะสมครบแล้ว</b><div class="small muted">นับรวมประวัติทุกศาลในจังหวัดนั้น · ตัดตัวเลือก ${hits("T-03")} รายการ</div></div>${sw("t03",RULES.T03.on)}</div>
+    <div class="rule"><span class="code">R-01</span><div class="grow"><b>ห้ามกลับศาลเดิม</b> ${pill("warn","รอยืนยัน")}<div class="small muted">ตัดตัวเลือก ${hits("R-01")} รายการ</div>
+      <label class="f" style="max-width:200px;margin-top:6px">ภายใน (ปี)<input type="number" id="ry" min="1" max="10" value="${RULES.R01.years}" ${ro?"disabled":""}></label></div>${sw("r01",RULES.R01.on)}</div>
+    <div class="rule"><span class="code">C-01</span><div class="grow"><b>จังหวัดภูมิลำเนา</b> ${pill("warn","รอยืนยัน")}<div class="small muted">มีผล ${hits("C-01")} รายการ</div>
+      <label class="f" style="max-width:220px;margin-top:6px">ระดับ<select id="c01" ${ro?"disabled":""}><option value="off" ${RULES.C01.mode==="off"?"selected":""}>ปิด</option><option value="warn" ${RULES.C01.mode==="warn"?"selected":""}>เตือน</option><option value="block" ${RULES.C01.mode==="block"?"selected":""}>ห้าม</option></select></label></div></div>
+    <div class="rule"><span class="code">C-02</span><div class="grow"><b>คู่สมรสเป็นพนักงานอัยการในเขตอำนาจศาล</b> ${pill("warn","รอยืนยัน")}<div class="small muted">ห้าม · ตัดตัวเลือก ${hits("C-02")} รายการ</div></div>${sw("c02",RULES.C02.on)}</div>
+    <div class="rule"><span class="code">C-03</span><div class="grow"><b>คู่สมรสเป็นทนายความในเขตศาล</b> ${pill("warn","รอยืนยัน")}<div class="small muted">เตือน · มีผล ${hits("C-03")} รายการ</div></div>${sw("c03",RULES.C03.on)}</div>
+  </div>`;
+}
+function pageLog(){
+  return`<div class="pagehead"><div class="grow"><h1>บันทึกการดำเนินการ</h1><p class="sub">ทุกการกระทำในรอบนี้ บันทึกผู้ทำและเวลา ตรวจสอบย้อนหลังได้</p></div></div>
+  <div class="card"><div class="list log">${S.log.slice().reverse().map(l=>`<div class="li"><time>${esc(l.t)}</time><span class="grow"><b>${esc(l.who)}</b> ${esc(l.what)}</span></div>`).join("")}</div></div>`;
+}
+
+/* =========================================================
+   Judicial Commission (ก.ต.) page
+   ========================================================= */
+function pageKT(){
+  if(S.phase<3)return`<div class="pagehead"><div class="grow"><h1>ร่างบัญชีเสนอ</h1><p class="sub">ยังไม่มีร่างบัญชีเสนอในรอบนี้</p></div></div>
+    <div class="card stack">${phaseStepper()}<div class="note">ส่วนกลางยังไม่ได้เสนอร่างบัญชี ${S.ktNote?"(ส่งกลับไปแก้ไขแล้ว รอส่งใหม่)":""} ลองเข้าเป็นเจ้าหน้าที่ส่วนกลางเพื่อปิดรับ จัดวาง และเสนอ</div>
+    <button class="btn" data-act="switch" data-arg="central" style="align-self:flex-start">เข้าเป็นเจ้าหน้าที่ส่วนกลาง</button></div>`;
+  const R=S.result.res,all=JUDGES;
+  const movers=all.filter(j=>R[j.id].to&&R[j.id].to!==j.court);
+  const dist=[["อันดับ 1",all.filter(j=>R[j.id].rank===1&&R[j.id].to!==j.court).length],["อันดับ 2",all.filter(j=>R[j.id].rank===2).length],["อันดับ 3",all.filter(j=>R[j.id].rank===3).length],
+    ["ระบบเสนอ",all.filter(j=>R[j.id].kind==="auto").length],["ล็อกโดยเจ้าหน้าที่",all.filter(j=>R[j.id].kind==="lock"&&!R[j.id].rank).length],["ขอแต่ไม่ได้",all.filter(j=>R[j.id].kind==="stay"&&sub(j).length).length]];
+  const mx=Math.max(1,...dist.map(d=>d[1]));
+  const cases=[];
+  for(const j of all){const r=R[j.id];
+    if(j.req.special)cases.push({tone:"gold",tag:"เหตุผลพิเศษ",j,body:`${j.req.special} · เอกสาร: ${(j.req.docs||[]).map(d=>DOCP[d.status][1]).join(", ")||"ไม่มี"} · ผล: ${r.to&&r.to!==j.court?C[r.to].name:"อยู่ที่เดิม"}`});
+    if(r.kind==="auto"||r.kind==="none")cases.push({tone:"warn",tag:"ระบบเสนอ",j,body:r.to?`${C[r.to].name} · ${r.why.join(" · ")}`:"ยังไม่มีที่ลง"});
+    if(r.kind==="lock")cases.push({tone:"info",tag:"เจ้าหน้าที่ล็อก",j,body:`${C[r.to].name}${r.rank?` (ตรงอันดับ ${r.rank})`:" (ไม่อยู่ในตัวเลือก)"}`});
+    if(r.to&&r.to!==j.court){const w=check(j,r.to).filter(x=>x.sev==="warn");if(w.length)cases.push({tone:"warn",tag:"มีคำเตือน",j,body:w.map(x=>`${x.code} ${x.msg}`).join(" · ")+` · ${C[r.to].name}`})}
+  }
+  coupleIssues().forEach(c=>cases.push({tone:c.ok?"ok":"bad",tag:"ยื่นแบบคู่",j:J[c.a],body:`กับ ${J[c.b].name} · ${C[c.ta].name} / ${C[c.tb].name} · ห่าง ${c.d} กม.${c.same?" ศาลเดียวกัน":""}`}));
+  const done=S.phase===4;
+  return`<div class="pagehead"><div class="grow"><h1>ร่างบัญชีเสนอ ก.ต.</h1><p class="sub">ผู้พิพากษาศาลชั้นต้น ภาค 5 และภาค 6 · รอบมีผล 1 เม.ย. 2570 · เสนอโดยกองการเจ้าหน้าที่</p></div>${done?pill("ok","อนุมัติและประกาศผลแล้ว"):pill("warn","รอพิจารณา")}</div>
+  <div class="stats">
+    <div class="stat"><b>${movers.length}</b><span>รายชื่อที่ย้าย</span></div>
+    <button class="stat" data-act="reqs" data-arg="flag:forced"><b>${all.filter(mustMove).length}</b><span>ครบวาระ ต้องย้าย</span></button>
+    <div class="stat"><b>${cases.length}</b><span>กรณีที่ควรพิจารณา</span></div>
+    <div class="stat"><b style="color:${S.result.envy?"var(--bad)":"var(--ok)"}">${S.result.envy?S.result.envy+" กรณี":"ไม่มี"}</b><span>ผู้อาวุโสน้อยกว่าได้ก่อนผู้อาวุโสกว่า</span></div>
+  </div>
+  <div class="grid2e" style="margin-bottom:16px">
+    <section class="card stack"><h2>รายงานความยุติธรรม</h2>
+      <div>${dist.map(([l,v])=>`<div class="hbar"><span>${l}</span><span class="track"><i style="width:${v/mx*100}%"></i></span><span>${v}</span></div>`).join("")}</div>
+      <p class="small muted" style="margin:0">ระบบตรวจทุกคู่แล้ว ไม่มีกรณีที่ผู้อาวุโสกว่าอยากได้ศาลหนึ่งและผ่านกฎ แต่ศาลนั้นไปตกกับผู้อาวุโสน้อยกว่า</p></section>
+    <section class="card stack"><h2>${done?"ผลการพิจารณา":"มติ"}</h2>
+      ${done?`<div class="note ok">อนุมัติเมื่อ ${esc(S.ktDecision)} ประกาศผลให้ผู้พิพากษาแล้ว</div><button class="btn" data-act="switch" data-arg="judge" style="align-self:flex-start">ดูผลในมุมผู้พิพากษา</button>`:
+      `<label class="f">ความเห็น (ใส่เมื่อส่งกลับ)<textarea id="ktnote" placeholder="เช่น ขอให้ทบทวนกรณีนายธนพล เรื่องดูแลบิดาป่วย"></textarea></label>
+      <div class="row"><button class="btn primary" data-act="approve">อนุมัติและประกาศผล</button><button class="btn danger" data-act="sendback">ส่งกลับให้แก้ไข</button></div>`}</section>
+  </div>
+  <h2 style="margin-bottom:10px">กรณีที่ควรพิจารณา <span class="small muted" style="font-weight:400">คลิกเพื่อเปิดคำขอ</span></h2>
+  <div class="prov" style="margin-bottom:16px">${cases.map(c=>`<div class="case" data-act="open" data-arg="${c.j.id}"><div class="row">${pill(c.tone,c.tag)}<span class="small muted">#${fmt(c.j.sen)}</span></div><b>${esc(c.j.name)}</b><span class="small">${esc(c.body)}</span></div>`).join("")}</div>
+  ${[5,6].map(rg=>{const m=movers.filter(j=>C[R[j.id].to].region===rg);return`<div class="region-h"><h2>บัญชีภาค ${rg}</h2><span class="small muted">${m.length} ราย</span></div>
+    <div class="tablewrap"><table class="click"><thead><tr><th>อาวุโส</th><th>ชื่อ</th><th>ตำแหน่งเดิม</th><th>ตำแหน่งใหม่</th><th>ที่มา</th></tr></thead><tbody>
+    ${m.map(j=>`<tr data-act="open" data-arg="${j.id}"><td class="n">#${fmt(j.sen)}</td><td>${esc(j.name)}</td><td>${esc(C[j.court].name)}</td><td><b>${esc(C[R[j.id].to].name)}</b></td><td>${pill(...statusOf(j))}</td></tr>`).join("")}</tbody></table></div>`}).join("")}`;
+}
+
+function matchQ(j){const f=S.qf,q=S.q.trim();
+  return(f.status==="all"||j.req.status===f.status)&&(f.region==="all"||C[j.court].region===+f.region)
+    &&(!f.flag||(f.flag==="forced"&&mustMove(j))||(f.flag==="docs"&&pendingDocs(j))||(f.flag==="special"&&!!(j.req.special||(j.req.docs||[]).length))||(f.flag==="blocked"&&j.prefs.some(c=>blocked(j,c)))||(f.flag==="couple"&&j.req.couple))
+    &&(!q||j.name.includes(q)||String(j.sen).includes(q.replace(/\D/g,"")||"~"))}
+function pageReqs(){
+  const f=S.qf,all=JUDGES,rows=all.filter(matchQ);
+  const chip=(k,v,label,n)=>`<button data-act="qf" data-arg="${k}:${v}" aria-pressed="${k==="flag"?f.flag===v:f[k]===v}">${label}${n!=null?` · ${n}`:""}</button>`;
+  const by=(fn)=>all.filter(fn).length;
+  return`<div class="pagehead"><div class="grow"><h1>คำขอทั้งหมด</h1><p class="sub">รอบมีผล 1 เม.ย. 2570 · ${all.length} คนใน ${COURTS.length} ศาล · คลิกแถวเพื่อเปิดคำขอฉบับเต็ม</p></div>
+    <input type="text" id="q" class="search" placeholder="ค้นหาชื่อหรือเลขอาวุโส" value="${esc(S.q)}" aria-label="ค้นหา"></div>
+  <div class="card" style="padding:12px 14px;margin-bottom:12px">
+    <div class="fgroup filters" style="margin-bottom:8px"><span>สถานะ</span>${chip("status","all","ทั้งหมด",all.length)}${chip("status","submitted","ส่งแล้ว",by(j=>j.req.status==="submitted"))}${chip("status","draft","มีร่าง",by(j=>j.req.status==="draft"))}${chip("status","none","ยังไม่ยื่น",by(j=>j.req.status==="none"))}</div>
+    <div class="fgroup filters" style="margin-bottom:8px"><span>ภาค</span>${chip("region","all","ทุกภาค")}${chip("region","5","ภาค 5",by(j=>inRegion(j,5)))}${chip("region","6","ภาค 6",by(j=>inRegion(j,6)))}</div>
+    <div class="fgroup filters" style="margin-bottom:0"><span>เฉพาะ</span>${chip("flag","forced","ครบวาระ",by(mustMove))}${chip("flag","docs","เอกสารรอตรวจ",by(pendingDocs))}${chip("flag","special","มีเหตุผลพิเศษหรือเอกสาร",by(j=>!!(j.req.special||(j.req.docs||[]).length)))}${chip("flag","blocked","มีตัวเลือกติดกฎ",by(j=>j.prefs.some(c=>blocked(j,c))))}${chip("flag","couple","ยื่นแบบคู่",by(j=>j.req.couple))}</div>
+  </div>
+  <p class="small muted" style="margin:0 0 8px">แสดง ${rows.length} จาก ${all.length} รายการ</p>
+  <div class="tablewrap"><table class="click" style="min-width:860px"><thead><tr><th>อาวุโส</th><th>ชื่อ</th><th>ศาลปัจจุบัน</th><th>ความประสงค์</th><th>คำขอ</th><th>เอกสาร</th><th>ยื่นเมื่อ</th></tr></thead><tbody>
+  ${rows.map(j=>`<tr data-act="open" data-arg="${j.id}"><td class="n">#${fmt(j.sen)}</td>
+    <td><b>${esc(j.name)}</b>${mustMove(j)?' <span class="pill warn">ครบวาระ</span>':""}${j.req.couple?' <span class="pill gold">คู่</span>':""}</td>
+    <td>${esc(shortC(j.court))} <span class="faint small">ภาค ${C[j.court].region}</span></td>
+    <td><div class="chips">${j.prefs.map((c,i)=>`<span class="chip ${blocked(j,c)?"x":""}" title="${blocked(j,c)?"ติดกฎ":""}">${i+1}. ${esc(shortC(c))}</span>`).join("")||'<span class="faint">–</span>'}</div></td>
+    <td>${reqPill(j)}</td><td>${(j.req.docs||[]).length?docPill(j.req.docs.find(d=>d.status!=="ok")||j.req.docs[0]):'<span class="faint">–</span>'}</td>
+    <td class="small muted">${esc(j.req.at||"–")}</td></tr>`).join("")||`<tr><td colspan="7" class="empty-state">ไม่พบคำขอที่ตรงตัวกรอง</td></tr>`}
+  </tbody></table></div>`;
+}
+function pageReq(){
+  const j=J[S.detail],role=S.user.role;
+  const canVerify=((role==="region"&&inRegion(j,5))||role==="central")&&S.phase<3;
+  const res=S.result&&(role!=="judge"||S.phase===4)?S.result.res[j.id]:null;
+  const text=j.req.special||j.req.reason;
+  const rows=[...j.past.slice().sort((a,b)=>a.y-b.y).map(p=>({c:p.c,m:p.m,y:p.y})),].reverse();
+  const provs=[...new Set([C[j.court].prov,...j.past.map(p=>C[p.c].prov)])];
+  const conds=[];
+  if(j.cond&&j.cond.near&&j.spouse)conds.push(["จำเป็น",`อยู่ใกล้คู่สมรสไม่เกิน ${j.cond.km} กม. แต่${j.cond.sep==="prov"?"คนละจังหวัด":"คนละศาล"}`]);
+  if(j.mother&&j.cond.careNear!==false)conds.push(["สำคัญ",`อยู่ใกล้ผู้ที่ต้องดูแลที่ จ.${j.mother} ไม่เกิน 150 กม.`]);
+  if(j.kids)conds.push(["ถ้าได้ก็ดี",`อยู่ใกล้โรงเรียนบุตรที่ จ.${j.kids}`]);
+  if(j.health)conds.push(["สำคัญ","อยู่ใกล้โรงพยาบาลที่รักษาต่อเนื่อง"]);
+  return`<div class="pagehead"><div class="grow"><button class="btn small ghost" data-act="back" style="margin:0 0 4px -10px">‹ กลับ</button><h1>${esc(j.name)}</h1>
+      <p class="sub">อาวุโสลำดับที่ ${fmt(j.sen)} · ${esc(posOf(j.court))} · ${esc(C[j.court].name)} · ภาค ${C[j.court].region}</p></div>
+    <div class="row">${reqPill(j)}${mustMove(j)?pill("warn","ครบวาระ ต้องย้าย"):pill("neutral","ยังไม่ครบวาระ")}${j.req.couple?pill("gold","ยื่นแบบคู่"):""}</div></div>
+  <div class="grid2">
+    <div class="stack">
+      <section class="card stack"><div class="row"><h2 class="grow">ความประสงค์ 3 อันดับ</h2><span class="small muted">${j.req.at?`ส่งเมื่อ ${esc(j.req.at)}`:j.req.status==="draft"?"ยังเป็นร่าง":"ยังไม่ได้ยื่น"}</span></div>
+        ${j.prefs.length?j.prefs.map((c,i)=>{const ch=check(j,c);const sw=JUDGES.filter(o=>o.sen<j.sen&&sub(o).includes(c)).length;
+          return`<div class="choice" style="align-items:flex-start"><div class="num">${i+1}</div><div class="grow"><b>${esc(C[c].name)}</b>
+            <div class="small muted">${C[c].seats} ที่นั่ง · ผู้อาวุโสกว่าที่ขอศาลนี้ ${sw} คน${j.spouse?` · ห่างที่ทำงานคู่สมรส ${km(j.spouse.prov,C[c].prov)} กม.`:""}</div>
+            <div class="reasons" style="margin-top:4px">${ch.length?ch.map(x=>`<span class="${x.sev==="block"?"r-bad":"r-warn"}">${x.sev==="block"?"✕":"!"} ${x.code} ${esc(x.msg)}</span>`).join(""):'<span class="r-ok">✓ ผ่านกฎทุกข้อ</span>'}</div></div>
+            ${res&&res.to===c?pill("ok","ได้ศาลนี้"):""}</div>`}).join(""):`<div class="empty-state" style="padding:16px">${j.req.status==="none"?"ยังไม่ได้ยื่นคำขอ"+(mustMove(j)?" ถ้าไม่ยื่น ระบบจะหาที่ลงให้จากที่นั่งที่เหลือ":""):"ยังไม่ได้เลือกศาล"}</div>`}
+        ${j.req.fallback?`<div class="note">ยินยอมให้ใช้เงื่อนไขจำเป็นหาที่ลง ถ้าครบวาระแต่ไม่ได้ทั้ง 3 ที่</div>`:""}
+      </section>
+      <section class="card stack"><h2>เหตุผลประกอบและเอกสาร</h2>
+        ${text?`<blockquote style="margin:0;padding:10px 14px;border-left:3px solid var(--gold);background:var(--surface2);border-radius:0 8px 8px 0">${esc(text)}</blockquote>`:`<p class="muted" style="margin:0">ไม่ได้ระบุเหตุผลประกอบ</p>`}
+        ${(j.req.docs||[]).length?(j.req.docs).map((d,i)=>`<div class="doc" style="flex-wrap:wrap"><span class="grow">📎 ${esc(d.name)}${d.note?`<br><span class="small muted">${esc(d.note)}</span>`:""}</span>${docPill(d)}
+          ${canVerify&&d.status!=="ok"?`<button class="btn small" data-act="docok" data-arg="${j.id}:${i}">ยืนยัน</button>`:""}${canVerify&&d.status==="pending"?`<button class="btn small danger" data-act="docmore" data-arg="${j.id}:${i}">ขอเพิ่ม</button>`:""}</div>`).join(""):`<p class="small muted" style="margin:0">ไม่มีเอกสารแนบ</p>`}
+      </section>
+      <section class="card stack"><h2>สถานการณ์และเงื่อนไขชีวิต</h2>
+        <dl class="kv"><dt>คู่สมรส</dt><dd>${j.spouse?`${esc(j.spouse.job)} · ทำงานที่ จ.${esc(j.spouse.prov)}${j.spouse.link?` (${esc(J[j.spouse.link].name)})`:""}`:"ไม่มี"}</dd>
+          <dt>ผู้ที่ต้องดูแล</dt><dd>${j.mother?`บิดามารดา · จ.${esc(j.mother)}`:"ไม่มี"}</dd><dt>บุตร</dt><dd>${j.kids?`เรียนที่ จ.${esc(j.kids)}`:"ไม่มีข้อมูล"}</dd>
+          <dt>สุขภาพ</dt><dd>${j.health?"ต้องรักษาต่อเนื่อง":"ไม่มีข้อมูล"}</dd><dt>ภูมิลำเนา</dt><dd>จ.${esc(j.dom)}</dd></dl>
+        ${conds.length?`<div class="stack" style="gap:6px">${conds.map(([lv,t])=>`<div class="row" style="flex-wrap:nowrap">${pill(lv==="จำเป็น"?"bad":lv==="สำคัญ"?"warn":"neutral",lv)}<span>${esc(t)}</span></div>`).join("")}</div>`:`<p class="small muted" style="margin:0">ไม่ได้ตั้งเงื่อนไขชีวิต</p>`}
+        <p class="small muted" style="margin:0">เงื่อนไขชีวิตใช้แนะนำศาลและหาที่ลงสำหรับผู้ครบวาระ ไม่เปลี่ยนลำดับอาวุโส</p>
+      </section>
+      ${res?`<section class="card stack"><div class="row"><h2 class="grow">ผลการจัดวาง${S.phase<4?" (ร่าง)":""}</h2>${pill(...statusOf(j))}</div>${explain(j).map(s=>`<div class="step">${pill(s.tone,s.head)}<span>${esc(s.body)}</span></div>`).join("")}</section>`:""}
+    </div>
+    <aside class="stack">
+      <section class="card stack"><h2>วาระและประวัติ</h2>
+        <dl class="kv"><dt>ศาลปัจจุบัน</dt><dd>${esc(C[j.court].name)}</dd><dt>อยู่มาแล้ว</dt><dd>${j.months} เดือน</dd></dl>
+        ${provs.map(p=>{const m=provMonths(j,p);const pc=Math.min(100,m/RULES.T02.cap*100);return`<div><div class="row small"><span class="grow">จ.${esc(p)}</span><span class="${m>=RULES.T02.cap?"r-bad":"muted"}">${m}/${RULES.T02.cap} เดือน</span></div><div class="bar"><i class="${m>=RULES.T02.cap?"b":pc>80?"w":""}" style="width:${pc}%"></i></div></div>`}).join("")}
+        <div class="list">${[{c:j.court,m:j.months,cur:true},...rows].map(r=>`<div class="li"><span class="grow">${esc(C[r.c].name)}</span><span class="small muted">${r.cur?"ปัจจุบัน":`${r.m} เดือน · ${r.y} ปีก่อน`}</span></div>`).join("")}</div>
+      </section>
+      <section class="card stack"><h2>ความเคลื่อนไหวของคำขอ</h2>
+        ${(j.req.hist||[]).length?`<div class="list log">${j.req.hist.slice().reverse().map(h=>`<div class="li" style="flex-direction:column;align-items:flex-start;gap:0"><span class="small faint">${esc(h.t)}</span><span>${esc(h.what)}</span></div>`).join("")}</div>`:`<p class="small muted" style="margin:0">ยังไม่มีความเคลื่อนไหว</p>`}
+        ${(role==="region"&&inRegion(j,5)||role==="central")&&j.req.status!=="submitted"&&S.phase===0?(S.reminded[j.id]?pill("info","แจ้งเตือนแล้ว"):`<button class="btn" data-act="remind" data-arg="${j.id}">ส่งแจ้งเตือนให้ยื่นคำขอ</button>`):""}
+      </section>
+      <p class="small muted" style="margin:0">${role==="judge"?"ข้อมูลนี้เห็นเฉพาะคุณ เจ้าหน้าที่ที่มีสิทธิ์ และ ก.ต.":"ข้อมูลครอบครัวเป็นข้อมูลส่วนบุคคล เปิดดูได้เฉพาะผู้มีสิทธิ์ และทุกการเปิดดูถูกบันทึก"}</p>
+    </aside>
+  </div>`;
+}
+/* =========================================================
+   Nationwide court structure (names follow the real structure; numbers outside ภาค 5/6 demo courts are simulated)
+   ========================================================= */
+const NREG={
+ 1:["ชัยนาท","นนทบุรี","ปทุมธานี","พระนครศรีอยุธยา","ลพบุรี","สมุทรปราการ","สระบุรี","สิงห์บุรี","อ่างทอง","นครนายก"],
+ 2:["จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ตราด","ปราจีนบุรี","ระยอง","สระแก้ว"],
+ 3:["นครราชสีมา","บุรีรัมย์","ศรีสะเกษ","สุรินทร์","ยโสธร","อุบลราชธานี","ชัยภูมิ","อำนาจเจริญ"],
+ 4:["ขอนแก่น","เลย","หนองคาย","อุดรธานี","สกลนคร","นครพนม","มุกดาหาร","กาฬสินธุ์","มหาสารคาม","ร้อยเอ็ด","หนองบัวลำภู","บึงกาฬ"],
+ 5:["เชียงใหม่","ลำพูน","ลำปาง","เชียงราย","พะเยา","แพร่","น่าน","แม่ฮ่องสอน"],
+ 6:["นครสวรรค์","กำแพงเพชร","ตาก","สุโขทัย","พิษณุโลก","พิจิตร","อุตรดิตถ์","เพชรบูรณ์","อุทัยธานี"],
+ 7:["นครปฐม","ราชบุรี","กาญจนบุรี","สุพรรณบุรี","สมุทรสาคร","สมุทรสงคราม","เพชรบุรี","ประจวบคีรีขันธ์"],
+ 8:["กระบี่","ชุมพร","นครศรีธรรมราช","พังงา","ภูเก็ต","ระนอง","สุราษฎร์ธานี"],
+ 9:["สงขลา","สตูล","ตรัง","พัทลุง","ปัตตานี","ยะลา","นราธิวาส"]};
+const REGNAME={0:"ศาลชั้นต้นในกรุงเทพมหานคร",1:"ภาคกลาง",2:"ภาคตะวันออก",3:"ภาคอีสานตอนล่าง",4:"ภาคอีสานตอนบน",5:"ภาคเหนือตอนบน",6:"ภาคเหนือตอนล่าง",7:"ภาคตะวันตก",8:"ภาคใต้ตอนบน",9:"ภาคใต้ตอนล่าง"};
+const BKK=["ศาลแพ่ง","ศาลแพ่งกรุงเทพใต้","ศาลแพ่งธนบุรี","ศาลแพ่งมีนบุรี","ศาลอาญา","ศาลอาญากรุงเทพใต้","ศาลอาญาธนบุรี","ศาลอาญามีนบุรี","ศาลแขวงพระนครเหนือ","ศาลแขวงพระนครใต้","ศาลแขวงดุสิต","ศาลแขวงปทุมวัน","ศาลแขวงธนบุรี","ศาลแขวงตลิ่งชัน","ศาลแขวงดอนเมือง","ศาลเยาวชนและครอบครัวกลาง"];
+const SPEC=["ศาลแรงงานกลาง","ศาลภาษีอากรกลาง","ศาลทรัพย์สินทางปัญญาและการค้าระหว่างประเทศกลาง","ศาลล้มละลายกลาง","ศาลอาญาคดีทุจริตและประพฤติมิชอบกลาง"];
+let NATION=null,NIDX={};
+function buildNation(){
+  const R=rng(424242),n=(a,b)=>a+Math.floor(R()*(b-a+1));
+  const mk=(id,name,kind,seats)=>{const filled=Math.max(1,seats-n(0,Math.max(1,Math.ceil(seats*.12))));
+    return{id,name,kind,seats,filled,forced:Math.round(filled*(0.08+R()*0.18)),apply:Math.round(filled*(0.15+R()*0.3))}};
+  const N={supreme:mk("sc","ศาลฎีกา","ศาลฎีกา",n(150,175)),
+    appeal:[mk("ac","ศาลอุทธรณ์","ศาลอุทธรณ์",n(150,180)),...[1,2,3,4,5,6,7,8,9].map(i=>mk("ac"+i,"ศาลอุทธรณ์ภาค "+i,"ศาลอุทธรณ์",n(35,60))),mk("acs","ศาลอุทธรณ์คดีชำนัญพิเศษ","ศาลอุทธรณ์",n(30,45))],
+    regions:[]};
+  N.regions.push({rg:0,groups:[{title:"ศาลชั้นต้นในกรุงเทพมหานคร",courts:BKK.map((x,i)=>mk("bk"+i,x,"ศาลชั้นต้น ส่วนกลาง",x.includes("แขวง")?n(8,16):n(25,60)))},
+    {title:"ศาลชำนัญพิเศษ",courts:SPEC.map((x,i)=>mk("sp"+i,x,"ศาลชำนัญพิเศษ",n(12,35)))}]});
+  for(let rg=1;rg<=9;rg++){
+    const groups=[{title:"ศาลระดับภาค",courts:[mk("lb"+rg,"ศาลแรงงานภาค "+rg,"ศาลชำนัญพิเศษ",n(6,12))]}];
+    for(const p of NREG[rg]){
+      const demo=COURTS.filter(c=>c.prov===p);
+      if(demo.length){groups.push({title:"จ."+p,prov:p,courts:demo.map(c=>({id:c.id,name:c.name,kind:"ศาลชั้นต้น ภาค "+rg,demo:true}))});continue}
+      const k=p.replace(/\s/g,"");const cs=[mk("p-"+k,"ศาลจังหวัด"+p,"ศาลชั้นต้น ภาค "+rg,n(4,14))];
+      if(R()<0.45)cs.push(mk("m-"+k,"ศาลแขวง"+p,"ศาลชั้นต้น ภาค "+rg,n(2,5)));
+      cs.push(mk("j-"+k,"ศาลเยาวชนและครอบครัวจังหวัด"+p,"ศาลชั้นต้น ภาค "+rg,n(2,4)));
+      groups.push({title:"จ."+p,prov:p,courts:cs});
+    }
+    N.regions.push({rg,groups});
+  }
+  NATION=N;NIDX={};[N.supreme,...N.appeal].forEach(c=>NIDX[c.id]=c);
+  N.regions.forEach(r=>r.groups.forEach(g=>g.courts.forEach(c=>{NIDX[c.id]=c;c.rg=r.rg;c.prov=g.prov})));
+}
+// live numbers for demo courts come from the judges in this round; the rest are the simulated figures
+function cstat(c){
+  if(!c.demo)return c;
+  const d=C[c.id],h=JUDGES.filter(j=>j.court===c.id);
+  return{...c,seats:d.seats,filled:h.length,forced:h.filter(mustMove).length,apply:JUDGES.filter(j=>sub(j).includes(c.id)).length};
+}
+function sumStats(list){const t={courts:0,seats:0,filled:0,forced:0,apply:0};for(const c0 of list){const c=cstat(c0);t.courts++;t.seats+=c.seats;t.filled+=c.filled;t.forced+=c.forced;t.apply+=c.apply}return t}
+const regCourts=rg=>NATION.regions.find(r=>r.rg===rg).groups.flatMap(g=>g.courts);
+const fillBar=(f,s)=>`<div class="bar" title="มีคน ${f} จาก ${s}"><i class="${f/s<0.85?"w":""}" style="width:${Math.min(100,f/s*100)}%"></i></div>`;
+/* ---------- simulated people for every court (seeded per court, so they never change between visits) ---------- */
+function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0}return h}
+const allSimCourts=()=>Object.values(NIDX);
+function leadTitle(c){if(c.id==="sc")return"ประธานศาลฎีกา";if(c.id==="ac")return"ประธานศาลอุทธรณ์";if(c.id.startsWith("ac"))return"ประธาน"+c.name;
+  if(c.rg===0)return"อธิบดีผู้พิพากษา"+c.name;return"ผู้พิพากษาหัวหน้า"+c.name}
+function memberTitle(c){if(c.id==="sc")return"ผู้พิพากษาศาลฎีกา";if(c.id.startsWith("ac"))return"ผู้พิพากษาศาลอุทธรณ์";return"ผู้พิพากษา"}
+function people(c){
+  if(c._ppl)return c._ppl;
+  if(c.demo){ // real judges in this round, rebuilt each time because requests and rules change
+    const hs=JUDGES.filter(j=>j.court===c.id).map(j=>({real:j.id,name:j.name,sen:j.sen,title:posOf(j.court),months:j.months,forced:mustMove(j),court:c.id,past:j.past.map(p=>({name:C[p.c].name,m:p.m,y:p.y})),req:j.req.status}));
+    const as=JUDGES.filter(j=>sub(j).includes(c.id)).map(j=>({real:j.id,name:j.name,sen:j.sen,title:posOf(j.court),months:j.months,forced:mustMove(j),court:j.court,fromName:C[j.court].name,rank:sub(j).indexOf(c.id)+1,past:j.past.map(p=>({name:C[p.c].name,m:p.m,y:p.y})),req:j.req.status}));
+    return{holders:hs,apps:as};
+  }
+  const R=rng(hashStr(c.id)),pick=a=>a[Math.floor(R()*a.length)],n=(a,b)=>a+Math.floor(R()*(b-a+1));
+  const base=c.id==="sc"?1:c.id.startsWith("ac")?260:c.rg===0?700:1100,span=c.id==="sc"?320:c.id.startsWith("ac")?900:2600;
+  const pool=allSimCourts().filter(x=>x.id!==c.id&&!x.demo);
+  const mkp=(i,forced,extra)=>{const past=[];const k=n(1,3);for(let q=0;q<k;q++){const pc=pick(pool);past.push({name:pc.name,m:n(24,48),y:2+q*3+n(0,2)})}
+    return{name:FIRST[n(0,FIRST.length-1)]+" "+LAST[n(0,LAST.length-1)],sen:base+n(0,span),months:forced?n(72,80):n(4,66),forced,past,...extra}};
+  const holders=[];for(let i=0;i<c.filled;i++)holders.push(mkp(i,i<c.forced,{court:c.id,req:i<c.forced?pick(["submitted","submitted","submitted","draft","none"]):R()<0.25?"submitted":"none"}));
+  holders.sort((a,b)=>a.sen-b.sen);holders.forEach((h,i)=>h.title=i===0?leadTitle(c):memberTitle(c));
+  const apps=[];for(let i=0;i<c.apply;i++){const fc=pick(pool);apps.push(mkp(i,R()<0.3,{court:fc.id,fromName:fc.name,rank:n(1,3),req:"submitted",title:memberTitle(fc)}))}
+  apps.sort((a,b)=>a.sen-b.sen);
+  return c._ppl={holders,apps};
+}
+const REQTXT={submitted:["ok","ยื่นคำขอแล้ว"],draft:["warn","มีร่าง ยังไม่ส่ง"],none:["neutral","ไม่ได้ยื่นคำขอ"]};
+function personPanel(){
+  const {court,kind,i}=S.nperson,c=NIDX[court],P=people(c)[kind==="h"?"holders":"apps"][i];if(!P){S.nperson=null;return nodePanel()}
+  const staff=S.user.role!=="judge";const pc=Math.min(100,P.months/72*100);
+  return`<section class="card stack sticky">
+    <button class="btn small ghost" data-act="nperson" data-arg="" style="align-self:flex-start;margin-left:-10px">‹ กลับไปที่ ${esc(c.name)}</button>
+    <div class="row" style="flex-wrap:nowrap"><span class="av">${esc(P.name.replace(/^(นาย|นางสาว|นาง)/,"").slice(0,2))}</span><div class="grow"><h2>${esc(P.name)}</h2><span class="small muted">${esc(P.title||"")}</span></div></div>
+    <div class="row">${P.real?pill("gold","อยู่ในรอบเดโมนี้"):pill("neutral","ข้อมูลจำลอง")}${P.forced?pill("warn","ครบวาระ ต้องย้าย"):""}${pill(...REQTXT[P.req||"none"])}</div>
+    <dl class="kv"><dt>อาวุโสลำดับที่</dt><dd>${fmt(P.sen)}</dd><dt>ศาลปัจจุบัน</dt><dd>${esc(kind==="a"?P.fromName:c.name)}</dd><dt>อยู่มาแล้ว</dt><dd>${P.months} เดือน</dd>
+      ${kind==="a"?`<dt>ขอย้ายมาที่</dt><dd>${esc(c.name)} · อันดับ ${P.rank}</dd>`:""}</dl>
+    <div><div class="row small"><span class="grow muted">วาระในตำแหน่งปัจจุบัน</span><span class="${P.forced?"r-bad":"muted"}">${P.months}/72 เดือน</span></div><div class="bar"><i class="${P.forced?"b":pc>80?"w":""}" style="width:${pc}%"></i></div></div>
+    <div><b class="small">ประวัติการดำรงตำแหน่ง</b><div class="list">
+      <div class="li"><span class="grow">${esc(kind==="a"?P.fromName:c.name)}</span><span class="small muted">ปัจจุบัน</span></div>
+      ${P.past.map(p=>`<div class="li"><span class="grow">${esc(p.name)}</span><span class="small muted">${p.m} เดือน · ${p.y} ปีก่อน</span></div>`).join("")}</div></div>
+    ${P.real&&staff?`<button class="btn primary" data-act="open" data-arg="${P.real}">เปิดคำขอฉบับเต็ม</button>`:""}
+    <p class="small muted" style="margin:0">${P.real?(staff?"":"ข้อมูลครอบครัวและเหตุผลในคำขอเห็นเฉพาะเจ้าตัวและเจ้าหน้าที่"):"บุคคลนี้เป็นข้อมูลจำลองเพื่อให้เห็นภาพรวมของศาลนอกรอบเดโม"}</p>
+  </section>`;
+}
+function nodePanel(){
+  if(S.nperson)return personPanel();
+  const id=S.nsel;
+  if(id==="kt")return`<section class="card stack sticky"><h2>คณะกรรมการตุลาการศาลยุติธรรม (ก.ต.)</h2><p class="muted" style="margin:0">พิจารณาและให้ความเห็นชอบการแต่งตั้ง โยกย้าย และเลื่อนตำแหน่งผู้พิพากษาทั้งหมดในผังนี้</p>
+    <dl class="kv"><dt>รอบนี้</dt><dd>${esc(PH[S.phase])}</dd><dt>ประชุมพิจารณา</dt><dd>20 ก.พ. 2570</dd><dt>บัญชีที่จะพิจารณา</dt><dd>ภาค 5 และภาค 6 (เดโม)</dd></dl>
+    <div class="note">ก.ต. รับร่างบัญชีจากส่วนกลางพร้อมรายงานความยุติธรรม แล้วอนุมัติหรือส่งกลับ</div>${S.user.role==="kt"?`<button class="btn" data-act="nav" data-arg="khome" style="align-self:flex-start">ไปที่ร่างบัญชีเสนอ</button>`:""}</section>`;
+  if(id==="ojc")return`<section class="card stack sticky"><h2>สำนักงานศาลยุติธรรม</h2><p class="muted" style="margin:0">หน่วยธุรการของศาลยุติธรรม กองการเจ้าหน้าที่เป็นผู้ใช้หลักของระบบนี้</p>
+    <div class="list"><div class="li"><span class="dot"></span><span class="grow">เปิดและปิดรอบการโยกย้าย</span></div><div class="li"><span class="dot"></span><span class="grow">รันการจัดวาง ล็อกรายคน และตั้งกฎ</span></div><div class="li"><span class="dot"></span><span class="grow">จัดทำร่างบัญชีเสนอ ก.ต.</span></div></div>
+    <div class="list log">${S.log.slice(-3).reverse().map(l=>`<div class="li" style="flex-direction:column;align-items:flex-start;gap:0"><span class="small faint">${esc(l.t)}</span><span class="small">${esc(l.who)} ${esc(l.what)}</span></div>`).join("")}</div></section>`;
+  if(id==="root"){const t=sumStats(allSimCourts());return`<section class="card stack sticky"><h2>ศาลยุติธรรม</h2>
+    <dl class="kv"><dt>จำนวนศาลในผัง</dt><dd>${fmt(t.courts)} ศาล</dd><dt>อัตราผู้พิพากษา</dt><dd>${fmt(t.seats)} ตำแหน่ง</dd><dt>ว่างอยู่</dt><dd>${fmt(t.seats-t.filled)} ตำแหน่ง</dd><dt>ครบวาระรอบนี้</dt><dd>${fmt(t.forced)} คน</dd><dt>คำขอย้าย</dt><dd>${fmt(t.apply)} คำขอ</dd></dl>
+    <p class="small muted" style="margin:0">คลิกศาล ภาค หรือการ์ดตัวเลขเพื่อดูรายละเอียด</p></section>`}
+  const c0=NIDX[id];if(!c0)return`<section class="card stack sticky"><h2>เลือกศาล</h2><p class="muted" style="margin:0">คลิกศาลใดก็ได้เพื่อดูอัตรากำลัง รายชื่อผู้พิพากษา ผู้ครบวาระ และคำขอย้ายเข้า</p></section>`;
+  const c=cstat(c0),P=people(c0),tab=S.ntab||"h";
+  const plist=(arr,kind)=>arr.length?`<div class="list" style="max-height:420px;overflow:auto">${arr.map(({p,i})=>`<button class="li crow" style="flex-direction:row;align-items:center;border-radius:0;padding:8px 2px" data-act="nperson" data-arg="${c.id}|${kind}|${i}">
+      <span class="grow"><b style="font-weight:500">${esc(p.name)}</b> <span class="small muted">#${fmt(p.sen)}</span><br><span class="small muted">${esc(kind==="a"?`จาก ${p.fromName} · อันดับ ${p.rank}`:p.title)}</span></span>
+      ${p.forced?pill("warn","ครบวาระ"):`<span class="small muted">${p.months} ด.</span>`}<span class="faint">›</span></button>`).join("")}</div>`:`<p class="small muted" style="margin:0">${kind==="a"?"ยังไม่มีคำขอย้ายเข้า":"ไม่มีผู้ดำรงตำแหน่ง"}</p>`;
+  const vac=c.seats-c.filled;
+  return`<section class="card stack sticky">
+    <div><span class="small muted">${esc(c.kind)}${c.prov?` · จ.${esc(c.prov)}`:""}</span><h2>${esc(c.name)}</h2></div>
+    <div class="row">${c.demo?pill("gold","อยู่ในรอบเดโมนี้"):pill("neutral","ข้อมูลจำลอง")}${vac?pill("warn",`ว่าง ${vac}`):pill("ok","เต็ม")}</div>
+    <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0;gap:8px">
+      <button class="stat" data-act="ntab" data-arg="h" style="padding:10px 12px${tab==="h"?";border-color:var(--accent)":""}"><b style="font-size:20px">${c.filled}/${c.seats}</b><span>ผู้ดำรงตำแหน่ง</span></button>
+      <button class="stat" data-act="ntab" data-arg="f" style="padding:10px 12px${tab==="f"?";border-color:var(--accent)":""}"><b style="font-size:20px;color:var(--warn)">${c.forced}</b><span>ครบวาระ</span></button>
+      <button class="stat" data-act="ntab" data-arg="v" style="padding:10px 12px${tab==="v"?";border-color:var(--accent)":""}"><b style="font-size:20px">${vac}</b><span>ตำแหน่งว่าง</span></button>
+      <button class="stat" data-act="ntab" data-arg="a" style="padding:10px 12px${tab==="a"?";border-color:var(--accent)":""}"><b style="font-size:20px">${c.apply}</b><span>คำขอย้ายเข้า</span></button>
+    </div>
+    ${fillBar(c.filled,c.seats)}
+    ${tab==="h"?`<b class="small">ผู้ดำรงตำแหน่ง เรียงตามอาวุโส</b>${plist(P.holders.map((p,i)=>({p,i})),"h")}`:""}
+    ${tab==="f"?`<b class="small">ครบวาระ ต้องย้ายรอบนี้</b>${plist(P.holders.map((p,i)=>({p,i})).filter(x=>x.p.forced),"h")}`:""}
+    ${tab==="v"?`<b class="small">ตำแหน่งว่าง</b>${vac?`<div class="seats">${Array.from({length:vac}).map((_,i)=>`<div class="seat vac">ตำแหน่ง${esc(memberTitle(c))} ว่าง ${i+1}</div>`).join("")}</div>
+      <p class="small muted" style="margin:0">รวมกับที่นั่งของผู้ครบวาระ ${c.forced} ที่ จะเปิดให้ผู้ขอย้ายเข้าในรอบนี้ ${vac+c.forced} ที่</p>`:`<p class="small muted" style="margin:0">ไม่มีตำแหน่งว่างตอนนี้ ที่นั่งจะว่างเมื่อผู้ครบวาระ ${c.forced} คนย้ายออก</p>`}`:""}
+    ${tab==="a"?`<b class="small">ผู้ขอย้ายเข้า เรียงตามอาวุโส</b>${plist(P.apps.map((p,i)=>({p,i})),"a")}`:""}
+    ${c.demo&&S.user.role!=="judge"?`<button class="btn small" data-act="court" data-arg="${c.id}" style="align-self:flex-start">ดูที่นั่งในผังศาลรอบนี้</button>`:""}
+    ${c.demo?"":`<p class="small muted" style="margin:0">ศาลนี้อยู่นอกขอบเขตการจัดวางของเดโม ตัวเลขและรายชื่อเป็นข้อมูลจำลองเพื่อให้เห็นภาพรวม</p>`}
+  </section>`;
+}
+/* list views opened from the number cards; scope = all courts or one region */
+function listView(courts,mode){
+  const T={courts:"ศาลทั้งหมด",seats:"อัตรากำลังรายศาล",vac:"ศาลที่มีตำแหน่งว่าง",forced:"ผู้ครบวาระ ต้องย้ายรอบนี้",apply:"ศาลที่มีคำขอย้ายเข้ามากที่สุด",provs:"จังหวัดทั้งหมด"};
+  const back=`<div class="row" style="margin-bottom:10px"><button class="btn small" data-act="nlist" data-arg="">‹ กลับไปที่ผัง</button><h2 class="grow">${T[mode]}</h2></div>`;
+  if(mode==="provs"){const rows=[];for(let rg=1;rg<=9;rg++)for(const p of NREG[rg]){const g=NATION.regions[rg].groups.find(g=>g.prov===p);const s=sumStats(g.courts);rows.push({p,rg,s})}
+    return back+`<div class="tablewrap"><table class="click"><thead><tr><th>จังหวัด</th><th>ภาค</th><th>ศาล</th><th>อัตรา</th><th>ว่าง</th><th>ครบวาระ</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr data-act="nreg" data-arg="${r.rg}"><td><b>จ.${esc(r.p)}</b></td><td>ภาค ${r.rg}</td><td class="n">${r.s.courts}</td><td class="n">${r.s.seats}</td><td class="n">${r.s.seats-r.s.filled}</td><td class="n">${r.s.forced}</td></tr>`).join("")}</tbody></table></div>`}
+  if(mode==="forced"){const rows=[];for(const c0 of courts){const P=people(c0);P.holders.forEach((p,i)=>{if(p.forced)rows.push({p,i,c:c0})})}rows.sort((a,b)=>a.p.sen-b.p.sen);
+    return back+`<p class="small muted" style="margin:0 0 8px">${rows.length} คน · คลิกเพื่อดูประวัติ</p><div class="tablewrap"><table class="click"><thead><tr><th>อาวุโส</th><th>ชื่อ</th><th>ศาลปัจจุบัน</th><th>อยู่มาแล้ว</th><th>คำขอ</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr data-act="nperson" data-arg="${r.c.id}|h|${r.i}"><td class="n">#${fmt(r.p.sen)}</td><td><b>${esc(r.p.name)}</b>${r.c.demo?' <span class="pill gold">เดโม</span>':""}</td><td>${esc(r.c.name)}</td><td class="n" style="white-space:nowrap">${r.p.months} เดือน</td><td>${pill(...REQTXT[r.p.req||"none"])}</td></tr>`).join("")}</tbody></table></div>`}
+  let cs=courts.map(cstat);
+  if(mode==="vac")cs=cs.filter(c=>c.seats>c.filled).sort((a,b)=>(b.seats-b.filled)-(a.seats-a.filled));
+  if(mode==="apply")cs=cs.sort((a,b)=>b.apply-a.apply);
+  if(mode==="seats")cs=cs.sort((a,b)=>b.seats-a.seats);
+  return back+`<p class="small muted" style="margin:0 0 8px">${cs.length} ศาล · คลิกเพื่อดูรายละเอียด</p><div class="tablewrap"><table class="click"><thead><tr><th>ศาล</th><th>ที่ตั้ง</th><th>อัตรา</th><th>มีคน</th><th>ว่าง</th><th>ครบวาระ</th><th>คำขอเข้า</th></tr></thead><tbody>
+    ${cs.map(c=>`<tr data-act="nsel" data-arg="${c.id}" class="${S.nsel===c.id?"sel":""}"><td><b>${esc(c.name)}</b>${c.demo?' <span class="pill gold">เดโม</span>':""}</td><td class="small muted">${c.prov?"จ."+esc(c.prov):c.rg===0?"กรุงเทพฯ":c.rg?"ภาค "+c.rg:"ส่วนกลาง"}</td>
+      <td class="n">${c.seats}</td><td class="n">${c.filled}</td><td class="n" style="${c.seats>c.filled?"color:var(--warn)":""}">${c.seats-c.filled}</td><td class="n">${c.forced}</td><td class="n">${c.apply}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function statCards(t,extra){return`<div class="stats">
+    <button class="stat" data-act="nlist" data-arg="courts"><b>${fmt(t.courts)}</b><span>ศาล</span></button>
+    <button class="stat" data-act="nlist" data-arg="seats"><b>${fmt(t.seats)}</b><span>อัตราผู้พิพากษา</span></button>
+    <button class="stat" data-act="nlist" data-arg="vac"><b style="color:var(--warn)">${fmt(t.seats-t.filled)}</b><span>ตำแหน่งว่าง</span></button>
+    <button class="stat" data-act="nlist" data-arg="forced"><b>${fmt(t.forced)}</b><span>ครบวาระรอบนี้</span></button>
+    ${extra}</div>`}
+function pageNation(){
+  if(!NATION)buildNation();
+  if(S.nreg!=null)return pageNationRegion();
+  const N=NATION,all=allSimCourts(),t=sumStats(all);
+  const head=`<div class="pagehead"><div class="grow"><h1>ผังศาลทั้งหมด</h1><p class="sub">ศาลยุติธรรมทั้งประเทศ ตั้งแต่ศาลฎีกาถึงศาลจังหวัดใน 9 ภาค · คลิกได้ทุกศาล ทุกภาค ทุกตัวเลข และทุกรายชื่อ</p></div></div>
+    ${statCards(t,`<button class="stat" data-act="nlist" data-arg="provs"><b>77</b><span>จังหวัดใน 9 ภาค + กรุงเทพฯ</span></button>`)}`;
+  if(S.nlist)return head+`<div class="grid2"><div>${listView(all,S.nlist)}</div>${nodePanel()}</div>`;
+  const nb=(id,title,sub,cls="")=>`<button class="onode ${cls}" data-act="nsel" data-arg="${id}" aria-pressed="${S.nsel===id}"><b>${esc(title)}</b>${sub?`<span class="small muted">${sub}</span>`:""}</button>`;
+  const item=c0=>{const c=cstat(c0);return`<button class="oitem" data-act="nsel" data-arg="${c.id}" aria-pressed="${S.nsel===c.id}"><span class="grow">${esc(c.name)}</span><span class="small muted">${c.seats}</span></button>`};
+  const regItem=rg=>{const s=sumStats(regCourts(rg));return`<button class="oitem" data-act="nreg" data-arg="${rg}"><span class="grow"><b>${rg?"ภาค "+rg:"กรุงเทพฯ และศาลชำนัญพิเศษ"}</b><br><span class="small muted">${rg?REGNAME[rg]+" · ":""}${s.courts} ศาล · ${fmt(s.seats)} ตำแหน่ง</span></span>${rg===5||rg===6?pill("gold","เดโม"):""}<span class="faint">›</span></button>`};
+  return head+`<div class="grid2" style="margin-bottom:20px">
+    <section class="card" style="overflow:hidden"><div class="ochart">
+      <div class="toprow"><div class="l">${nb("kt","ก.ต.","อนุมัติการโยกย้าย","side")}</div>${nb("root","ศาลยุติธรรม",`${fmt(t.courts)} ศาล · ${fmt(t.seats)} ตำแหน่ง`,"root")}<div class="r">${nb("ojc","สำนักงานศาลยุติธรรม","ธุรการ · ผู้ใช้ระบบ","side")}</div></div>
+      <div class="vline"></div>
+      <div class="branches">
+        <div class="branch">${nb("sc","ศาลฎีกา",`${cstat(N.supreme).seats} ตำแหน่ง`)}<div class="olist"><div class="small muted" style="padding:4px 0">ศาลสูงสุด มีแผนกคดีต่าง ๆ ภายในศาลเดียว คลิกเพื่อดูรายชื่อ</div></div></div>
+        <div class="branch">${nb("ac","ศาลอุทธรณ์",`${N.appeal.length} ศาล · ${fmt(sumStats(N.appeal).seats)} ตำแหน่ง`)}
+          <div class="olist">${N.appeal.slice(1).map(item).join("")}</div></div>
+        <div class="branch"><button class="onode" data-act="nlist" data-arg="courts"><b>ศาลชั้นต้น</b><span class="small muted">${fmt(sumStats(NATION.regions.flatMap(r=>r.groups.flatMap(g=>g.courts))).courts)} ศาล</span></button>
+          <div class="olist">${[0,1,2,3,4,5,6,7,8,9].map(regItem).join("")}</div></div>
+      </div></div></section>
+    ${nodePanel()}
+  </div>
+  <h2 style="margin-bottom:10px">ศาลชั้นต้นรายภาค</h2>
+  <div class="rcards">${[0,1,2,3,4,5,6,7,8,9].map(rg=>{const s=sumStats(regCourts(rg));const provs=rg?NREG[rg].length:1;
+    return`<button class="rcard ${rg===5||rg===6?"demo":""}" data-act="nreg" data-arg="${rg}"><div class="row"><b class="grow">${rg?"ภาค "+rg:"กรุงเทพฯ"}</b>${rg===5||rg===6?pill("gold","อยู่ในรอบเดโม"):""}</div>
+      <span class="small muted">${esc(REGNAME[rg])} · ${provs} จังหวัด · ${s.courts} ศาล</span>${fillBar(s.filled,s.seats)}
+      <div class="row small" style="gap:12px"><span>${fmt(s.seats)} ตำแหน่ง</span><span class="r-warn">ว่าง ${s.seats-s.filled}</span><span>ครบวาระ ${s.forced}</span><span>คำขอ ${s.apply}</span></div></button>`}).join("")}</div>
+  <p class="small muted">ชื่อศาลตามโครงสร้างศาลยุติธรรม แต่จำนวนศาลต่อจังหวัด ตัวเลข และรายชื่อนอกภาค 5 และ 6 เป็นข้อมูลจำลองสำหรับเดโม บางจังหวัดจริงมีศาลมากกว่านี้</p>`;
+}
+function pageNationRegion(){
+  const rg=S.nreg,reg=NATION.regions.find(r=>r.rg===rg),courts=regCourts(rg),s=sumStats(courts);
+  const ac=rg?NIDX["ac"+rg]:null;
+  const head=`<div class="crumbs"><button data-act="nreg" data-arg="">ศาลยุติธรรม</button><span class="faint">›</span><button data-act="nlist2" data-arg="courts">ศาลชั้นต้น</button><span class="faint">›</span><b>${rg?"ภาค "+rg:"กรุงเทพฯ และศาลชำนัญพิเศษ"}</b></div>
+  <div class="pagehead"><div class="grow"><h1>${rg?`ภาค ${rg} · ${esc(REGNAME[rg])}`:"ศาลในกรุงเทพมหานคร"}</h1><p class="sub">${rg?`สำนักอธิบดีผู้พิพากษาภาค ${rg} · ${NREG[rg].length} จังหวัด · `:""}${s.courts} ศาล · คลิกได้ทุกศาล ทุกตัวเลข และทุกรายชื่อ</p></div>
+    <div class="row">${rg>1?`<button class="btn small" data-act="nreg" data-arg="${rg-1}">‹ ภาค ${rg-1}</button>`:rg===1?`<button class="btn small" data-act="nreg" data-arg="0">‹ กรุงเทพฯ</button>`:""}${rg<9?`<button class="btn small" data-act="nreg" data-arg="${rg+1}">ภาค ${rg+1} ›</button>`:""}</div></div>
+  ${statCards(s,`<button class="stat" data-act="nlist" data-arg="apply"><b>${s.apply}</b><span>คำขอย้ายเข้า</span></button>`)}
+  ${rg===5||rg===6?`<div class="note" style="margin-bottom:12px">ภาคนี้อยู่ในรอบเดโม ${rg===6?"เฉพาะ 4 จังหวัดที่มีกรอบสีทอง ":""}ตัวเลขและรายชื่อมาจากผู้พิพากษาและคำขอจริงในเดโม</div>`:""}`;
+  if(S.nlist)return head+`<div class="grid2"><div>${listView(courts,S.nlist)}</div>${nodePanel()}</div>`;
+  return head+`<div class="grid2">
+    <div class="prov">${ac?`<section class="card"><h3>ศาลอุทธรณ์ภาค ${rg}</h3><span class="small muted">ศาลชั้นอุทธรณ์ของภาคนี้</span><button class="crow" data-act="nsel" data-arg="${ac.id}" aria-pressed="${S.nsel===ac.id}" style="margin-top:6px"><div class="row" style="width:100%"><b class="grow">${esc(ac.name)}</b><span class="small muted">${ac.filled}/${ac.seats}</span></div>${fillBar(ac.filled,ac.seats)}</button></section>`:""}
+      ${reg.groups.map(g=>`<section class="card" ${g.courts.some(c=>c.demo)?'style="border-color:var(--gold)"':""}><h3>${esc(g.title)}</h3>
+        ${g.courts.map(c0=>{const c=cstat(c0);return`<button class="crow" data-act="nsel" data-arg="${c.id}" aria-pressed="${S.nsel===c.id}"><div class="row" style="width:100%;gap:6px"><span class="grow">${esc(c.name)}</span>${c.forced?`<span class="pill warn" title="ครบวาระรอบนี้">ครบวาระ ${c.forced}</span>`:""}<span class="small muted" title="มีคน/อัตรา">${c.filled}/${c.seats}</span></div>${fillBar(c.filled,c.seats)}</button>`}).join("")}</section>`).join("")}</div>
+    ${nodePanel()}
+  </div>`;
+}
+const PAGES={nation:pageNation,reqs:pageReqs,req:pageReq,home:pageJudgeHome,wish:pageWish,result:pageResult,history:pageHistory,rhome:pageRegionHome,review:pageReview,org:pageOrg,chome:pageCentralHome,run:pageRun,rules:pageRules,log:pageLog,khome:pageKT};
+
+/* =========================================================
+   Actions
+   ========================================================= */
+function login(id){const a=ACCOUNTS.find(x=>x.id===id);S.user=a;S.page=NAV[a.role][0][0];S.sel=null;S.step=0;S.nreg=null;S.nsel="root";S.nlist=null;S.nperson=null;S.ntab="h";render();window.scrollTo({top:0});toast(`เข้าสู่ระบบเป็น ${a.roleName}`)}
+function saveReason(){const t=document.getElementById("reason");if(t){const j=CUR();j.req.reason=t.value}}
+const ACT={
+  pick:a=>{S.pick=a;renderLogin()},
+  nsel:a=>{S.nsel=a;S.nperson=null;S.ntab="h";render();if(innerWidth<=980){const p=document.querySelector(".sticky");if(p)p.scrollIntoView({behavior:"smooth",block:"start"})}},
+  nreg:a=>{S.nreg=a===""?null:+a;S.nsel=null;S.nlist=null;S.nperson=null;render();window.scrollTo({top:0})},
+  nlist:a=>{S.nlist=a||null;S.nperson=null;render();window.scrollTo({top:0})},
+  nlist2:a=>{S.nreg=null;S.nlist=a;S.nperson=null;render();window.scrollTo({top:0})},
+  ntab:a=>{S.ntab=a;render()},
+  nperson:a=>{if(!a){S.nperson=null}else{const[court,kind,i]=a.split("|");S.nperson={court,kind,i:+i};S.nsel=court}render();if(innerWidth<=980){const p=document.querySelector(".sticky");if(p)p.scrollIntoView({behavior:"smooth",block:"start"})}},
+  open:a=>{saveReason();if(S.page!=="req")S.back=S.page;S.detail=a;go("req")},
+  back:()=>go(S.back||NAV[S.user.role][0][0]),
+  reqs:a=>{S.qf={status:"all",region:"all",flag:null};S.q="";if(a){const[k,v]=a.split(":");S.qf[k]=v}go("reqs")},
+  qf:a=>{const[k,v]=a.split(":");if(k==="flag")S.qf.flag=S.qf.flag===v?null:v;else S.qf[k]=v;render()},
+  rgo:a=>{S.rfilter=a;go("review")},
+  court:a=>{S.openCourt=a;go("org")},
+  login:()=>login(S.pick),
+  logout:()=>{S.pick=S.user.id;S.user=null;render();window.scrollTo({top:0})},
+  switch:a=>login(a),
+  reset:()=>{init();render();toast("รีเซ็ตเดโมแล้ว")},
+  nav:a=>{saveReason();if(a==="nation"&&S.page==="nation"){S.nreg=null;S.nsel="root";S.nlist=null;S.nperson=null}go(a)},
+  step:a=>{saveReason();S.step=+a;render();window.scrollTo({top:0})},
+  add:a=>{const j=CUR();if(j.prefs.length<3)j.prefs.push(a);render()},
+  rm:a=>{CUR().prefs.splice(+a,1);render()},
+  up:a=>{const p=CUR().prefs,i=+a;[p[i-1],p[i]]=[p[i],p[i-1]];render()},
+  adddoc:()=>{saveReason();const j=CUR();j.req.docs.push({name:`เอกสารประกอบ_${j.req.docs.length+1}.pdf`,status:"pending"});render()},
+  rmdoc:a=>{saveReason();CUR().req.docs.splice(+a,1);render()},
+  savedraft:()=>{saveReason();const j=CUR();if(j.req.status!=="submitted")j.req.status="draft";hist(j,"บันทึกร่างคำขอ");toast("บันทึกร่างแล้ว")},
+  submit:()=>{saveReason();const j=CUR();const again=j.req.status==="submitted";j.req.status="submitted";j.req.at=DEMO_DATE;
+    if(j.req.reason)j.req.special=j.req.reason;
+    hist(j,`${again?"แก้ไขและส่ง":"ส่ง"}คำขอ ${j.prefs.length} อันดับ`);
+    log(`${again?"แก้ไขและส่ง":"ส่ง"}คำขอย้าย ${j.prefs.length} อันดับ: ${j.prefs.map(c=>C[c].name).join(", ")}`);S.step=0;go("home");toast("ส่งคำขอแล้ว แก้ไขได้จนถึง 15 ม.ค. 2570")},
+  remind:a=>{S.reminded[a]=true;hist(J[a],"เจ้าหน้าที่ส่งแจ้งเตือนให้ยื่นคำขอ");log(`ส่งแจ้งเตือนให้ ${J[a].name} ยื่นคำขอ`);render();toast("ส่งแจ้งเตือนแล้ว")},
+  remindall:()=>{const l=JUDGES.filter(j=>inRegion(j,5)&&mustMove(j)&&j.req.status!=="submitted"&&!S.reminded[j.id]);l.forEach(j=>{S.reminded[j.id]=true;hist(j,"เจ้าหน้าที่ส่งแจ้งเตือนให้ยื่นคำขอ")});log(`ส่งแจ้งเตือนผู้ครบวาระที่ยังไม่ยื่น ${l.length} ราย`);render();toast(`ส่งแจ้งเตือน ${l.length} รายแล้ว`)},
+  openreview:a=>{S.sel=a;go("review")},
+  rfilter:a=>{S.rfilter=a;render()},
+  selr:a=>{S.sel=a;render();revealAside()},
+  docok:a=>{const[id,i]=a.split(":");const d=J[id].req.docs[+i];d.status="ok";d.note="";hist(J[id],`ยืนยันเอกสาร ${d.name}`);log(`ยืนยันเอกสาร "${d.name}" ของ ${J[id].name}`);render();toast("ยืนยันเอกสารแล้ว")},
+  docmore:a=>{const[id,i]=a.split(":");const d=J[id].req.docs[+i];d.status="more";d.note="ขอเอกสารฉบับรับรองสำเนา";hist(J[id],`ขอเอกสารเพิ่ม: ${d.note}`);log(`ขอเอกสารเพิ่มจาก ${J[id].name}`);render();toast("แจ้งขอเอกสารเพิ่มแล้ว")},
+  closeround:()=>{const d=JUDGES.filter(j=>j.req.status==="draft").length;S.phase=1;log(`ปิดรับคำขอ (ร่างที่ไม่ได้ส่ง ${d} ราย ถือว่าไม่ได้ยื่น)`);render();toast("ปิดรับคำขอแล้ว")},
+  startmatch:()=>{S.phase=2;rerun();log(`เริ่มจัดวาง ได้ร่างผล ตรวจความยุติธรรม${S.result.envy?"ไม่ผ่าน":"ผ่าน"}`);S.filter="all";go("run");toast("จัดวางเสร็จแล้ว")},
+  rerun:()=>{rerun();log("คำนวณร่างผลใหม่");render();toast("คำนวณใหม่แล้ว")},
+  filter:a=>{S.filter=a;render()},
+  sel:a=>{S.sel=a;render();revealAside()},
+  lock:a=>{const v=document.getElementById("lockto").value;S.locks[a]=v;rerun();hist(J[a],`เจ้าหน้าที่ล็อกผลที่ ${C[v].name}`);log(`ล็อก ${J[a].name} ที่ ${C[v].name}`);render();toast("ล็อกแล้ว ระบบจัดคนอื่นใหม่")},
+  unlock:a=>{delete S.locks[a];rerun();log(`ปลดล็อก ${J[a].name}`);render();toast("ปลดล็อกแล้ว")},
+  confirm:a=>{const t=S.result.res[a].to;S.locks[a]=t;rerun();log(`ยืนยันข้อเสนออัตโนมัติ ${J[a].name} ที่ ${C[t].name}`);render();toast("ยืนยันแล้ว")},
+  sendkt:()=>{const n=JUDGES.filter(j=>S.result.res[j.id].kind==="none").length;if(n){toast(`ยังมี ${n} รายไม่มีที่ลง`);return}
+    const pend=JUDGES.filter(j=>S.result.res[j.id].kind==="auto").length;S.phase=3;S.ktNote="";log(`เสนอร่างบัญชีต่อ ก.ต.${pend?` (มีข้อเสนออัตโนมัติที่ยังไม่ยืนยัน ${pend} ราย)`:""}`);go("chome");toast("เสนอ ก.ต. แล้ว")},
+  approve:()=>{S.phase=4;S.ktDecision=stamp();log("ก.ต. อนุมัติร่างบัญชี");log("ประกาศผลการโยกย้ายให้ผู้พิพากษาทุกคน","ระบบ");render();toast("อนุมัติและประกาศผลแล้ว")},
+  sendback:()=>{const t=document.getElementById("ktnote");const note=(t&&t.value.trim())||"ขอให้ทบทวนกรณีที่มีเหตุผลพิเศษ";S.ktNote=note;S.phase=2;log(`ก.ต. ส่งร่างกลับให้แก้ไข: ${note}`);render();toast("ส่งกลับแล้ว")},
+  resetrules:()=>{RULES=DEFAULT_RULES();if(S.phase===2)rerun();log("คืนค่ากฎเริ่มต้น");render();toast("คืนค่าเริ่มต้นแล้ว")},
+};
+root.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el||el.disabled)return;if(el.tagName==="A")e.preventDefault();const f=ACT[el.dataset.act];if(f)f(el.dataset.arg)});
+root.addEventListener("dblclick",e=>{const el=e.target.closest(".acct");if(el)login(el.dataset.arg)});
+root.addEventListener("change",e=>{
+  const t=e.target;if(!S.user)return;
+  if(S.page==="wish"){const j=CUR();
+    if(t.id==="sjob"){j.spouse=t.value==="ไม่มีคู่สมรส"?null:{...(j.spouse||{prov:"ลำปาง"}),job:t.value}}
+    else if(t.id==="sprov"&&j.spouse)j.spouse.prov=t.value;
+    else if(t.id==="mprov")j.mother=t.value==="ไม่มี"?null:t.value;
+    else if(t.id==="kprov")j.kids=t.value==="ไม่มี"?null:t.value;
+    else if(t.id==="health")j.health=t.checked;
+    else if(t.id==="near")j.cond.near=t.checked;
+    else if(t.id==="care")j.cond.careNear=t.checked;
+    else if(t.id==="sep")j.cond.sep=t.value;
+    else if(t.id==="km")j.cond.km=+t.value;
+    else if(t.id==="fallback"){j.req.fallback=t.checked;return}
+    else if(t.id==="couple"){j.req.couple=t.checked;return}
+    else return;
+    saveReason();render();return}
+  if(S.page==="rules"){
+    const map={t02:()=>RULES.T02.on=t.checked,t03:()=>RULES.T03.on=t.checked,r01:()=>RULES.R01.on=t.checked,c02:()=>RULES.C02.on=t.checked,c03:()=>RULES.C03.on=t.checked,
+      cap:()=>RULES.T02.cap=Math.max(12,+t.value||72),ry:()=>RULES.R01.years=Math.max(1,+t.value||4),c01:()=>RULES.C01.mode=t.value};
+    if(map[t.id]){map[t.id]();if(S.phase===2)rerun();log(`แก้กฎ ${t.id.toUpperCase()}`);render();toast(S.phase===2?"บันทึกกฎแล้ว ร่างผลคำนวณใหม่":"บันทึกกฎแล้ว")}
+  }
+});
+root.addEventListener("input",e=>{if(e.target.id==="q"){S.q=e.target.value;render();const q=document.getElementById("q");q.focus();q.setSelectionRange(q.value.length,q.value.length);return}
+  if(e.target.id==="km"){const v=document.getElementById("kmv");if(v)v.textContent=e.target.value+" กม."}});
+render();
+</script>
+
+</body>
+</html>
