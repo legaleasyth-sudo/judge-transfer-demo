@@ -21,26 +21,26 @@
   --accent:#8FB0EA; --accent-fg:#0F141C; --accent-soft:#1E2B44; --gold:#D9B25F; --gold-soft:#2E2512;
   --ok:#5CC48C; --ok-soft:#14301F; --warn:#E3B05A; --warn-soft:#33270F; --bad:#F08A7E; --bad-soft:#3A1A17; color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13.5px;line-height:1.5}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 .pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-h1{font-size:24px;margin:0;text-wrap:balance}h2{font-size:16px;margin:0}h3{font-size:14px;margin:0}
+h1{font-size:20px;margin:0;text-wrap:balance}h2{font-size:15px;margin:0}h3{font-size:14px;margin:0}
 .sub{color:var(--muted);margin:2px 0 0}
 .muted{color:var(--muted)}.faint{color:var(--faint)}.small{font-size:12px}
 .grow{flex:1;min-width:0}
-.stack{display:flex;flex-direction:column;gap:12px}
+.stack{display:flex;flex-direction:column;gap:10px}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:520px){.row2{grid-template-columns:1fr}}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
-.btn{font:inherit;font-weight:500;border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.btn{font:inherit;font-weight:500;border-radius:7px;padding:6px 12px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:6px;justify-content:center}
 .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .btn.danger{color:var(--bad)}
-.btn.small{padding:4px 10px;font-size:13px}
+.btn.small{padding:3px 9px;font-size:12.5px}
 .btn.icon{padding:4px 9px;flex:none}
 .btn.ghost{border-color:transparent;background:transparent}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.acct:focus-visible,nav.side button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.acct:focus-visible,nav.side button:focus-visible,.fopt:focus-visible,.th-sort:focus-visible,.pg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;border-radius:999px;padding:1px 9px;white-space:nowrap}
 .pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}
 .pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.info{background:var(--accent-soft);color:var(--accent)}
@@ -49,7 +49,7 @@ h1{font-size:24px;margin:0;text-wrap:balance}h2{font-size:16px;margin:0}h3{font-
 .note{border-radius:8px;padding:10px 12px;font-size:13px;background:var(--accent-soft);color:var(--accent)}
 .note.ok{background:var(--ok-soft);color:var(--ok)}.note.warn{background:var(--warn-soft);color:var(--warn)}.note.bad{background:var(--bad-soft);color:var(--bad)}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
-select,input[type=number],input[type=text],input[type=password],textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+select,input[type=number],input[type=text],input[type=search],input[type=password],textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 9px;width:100%}
 input[readonly]{background:var(--surface2)}
 textarea{min-height:84px;resize:vertical}
 input[type=range]{width:100%;accent-color:var(--accent)}
@@ -83,43 +83,53 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 @media (max-width:900px){.login-card{grid-template-columns:1fr}.login-side .flow{display:none}}
 @media (max-width:520px){.login-side,.login-main{padding:20px}}
 
-/* ----- Shell ----- */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
-.topin{display:flex;align-items:center;gap:12px;padding-block:10px}
-.brand{display:flex;gap:10px;align-items:center;line-height:1.25}
-.brand b{font-size:16px}
-.brand span{font-size:12px;color:var(--muted)}
-.logo{flex:none;width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
-.proto{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:1px 8px;white-space:nowrap}
-.top-right{margin-left:auto;display:flex;gap:10px;align-items:center}
-.bell{position:relative}
-.bell em{position:absolute;top:-4px;right:-4px;font-style:normal;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;display:grid;place-items:center;padding:0 4px}
-.who{display:flex;gap:8px;align-items:center;line-height:1.2}
-.who small{display:block;color:var(--muted);font-size:11.5px}
-.shell{display:grid;grid-template-columns:232px minmax(0,1fr);gap:24px;max-width:1360px;margin:0 auto;padding-block:20px 48px}
-nav.side{display:flex;flex-direction:column;gap:2px;position:sticky;top:76px;align-self:start}
-nav.side .grp{font-size:11px;font-weight:600;color:var(--faint);letter-spacing:.04em;padding:6px 12px 4px}
-nav.side button{font:inherit;text-align:left;border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:500;display:flex;gap:8px;align-items:center}
+/* ----- Shell: full-height left sidebar (off-canvas drawer under 900px) + slim top bar + working area ----- */
+.app{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+.sb{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 10px 10px}
+.sb-brand{display:flex;gap:10px;align-items:center;padding:2px 6px 12px;line-height:1.25}
+.sb-brand b{font-size:14px;display:block}.sb-brand span{font-size:11.5px;color:var(--muted)}
+.logo{flex:none;width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center}
+.sb-org{font-size:11.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;margin:0 2px 8px;line-height:1.35}
+nav.side{display:flex;flex-direction:column;gap:1px}
+nav.side .grp{font-size:10.5px;font-weight:600;color:var(--faint);letter-spacing:.05em;padding:10px 10px 3px}
+nav.side button{font:inherit;font-size:13px;text-align:left;border:0;background:transparent;color:var(--muted);padding:6px 10px;border-radius:7px;cursor:pointer;font-weight:500;display:flex;gap:9px;align-items:center}
+nav.side button:hover{background:var(--surface2);color:var(--fg)}
+nav.side button svg{flex:none;opacity:.85}
 nav.side button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
 nav.side button .cnt{margin-left:auto;font-size:11px;background:var(--bad-soft);color:var(--bad);border-radius:999px;padding:0 7px}
-nav.side .phasebox{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12.5px;background:var(--surface)}
+.phasebox{margin:14px 2px 0;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:12px;background:var(--surface)}
+.sb-user{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;line-height:1.25;font-size:12.5px}
+.sb-user small{display:block;color:var(--muted);font-size:11px}
+.scrim{display:none}
+.mainc{min-width:0;display:flex;flex-direction:column}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;min-height:50px;padding-block:6px}
+.crumb{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb b{color:var(--fg);overflow:hidden;text-overflow:ellipsis}
+.proto{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:0 8px;white-space:nowrap}
+.top-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.bell{position:relative}
+.bell em{position:absolute;top:-4px;right:-4px;font-style:normal;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;display:grid;place-items:center;padding:0 4px}
+.burger,.top-av{display:none}
+main#main{padding-block:16px 40px;width:100%;max-width:1600px}
 @media (max-width:900px){
-  .shell{grid-template-columns:minmax(0,1fr);gap:12px;padding-top:0}
-  nav.side{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding:8px 0;border-bottom:1px solid var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-left:max(16px,env(safe-area-inset-left,0px))}
-  nav.side button{white-space:nowrap;flex:none}nav.side .grp,nav.side .phasebox{display:none}
-  .who .txt,.brand span,.proto{display:none}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .sb{position:fixed;left:0;top:0;bottom:0;height:auto;width:280px;max-width:86vw;z-index:30;transform:translateX(-102%);transition:transform .2s ease;box-shadow:0 10px 40px rgb(0 0 0/.18);padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .app.open .sb{transform:none}
+  .app.open .scrim{display:block;position:fixed;inset:0;background:rgb(10 14 20/.4);z-index:25}
+  .burger,.top-av{display:inline-flex}
+  .crumb .sys,.top-phase{display:none}
 }
-@media (max-width:600px){header.top{position:static}}
-.pagehead{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+@media (max-width:520px){.proto{display:none}}
+.pagehead{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px}
 .pagehead .grow{min-width:240px}
 .grid2{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
 .grid2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 .grid3{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
 @media (max-width:1100px){.grid2{grid-template-columns:minmax(0,1fr) 320px}}
 @media (max-width:980px){.grid2,.grid2e,.grid3{grid-template-columns:minmax(0,1fr)}}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.stat b{display:block;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.2}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
 .stat span{font-size:12px;color:var(--muted)}
 
 /* phase stepper */
@@ -149,10 +159,10 @@ nav.side .phasebox{margin-top:14px;border:1px solid var(--line);border-radius:10
 .doc{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--surface2)}
 
 /* tables & lists */
-.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
-th{text-align:left;font-weight:500;color:var(--muted);background:var(--surface2);padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px}
-td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{text-align:left;font-weight:500;color:var(--muted);background:var(--surface2);padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 table.click tbody tr{cursor:pointer}table.click tbody tr:hover{background:var(--surface2)}
 tbody tr.sel{background:var(--accent-soft)}
@@ -191,7 +201,7 @@ td.n{font-variant-numeric:tabular-nums;color:var(--muted)}
 .code{font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:1px 7px;flex:none}
 .case{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
 .hero{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.picks{position:sticky;top:80px}
+.picks{position:sticky;top:62px}
 @media (max-width:980px){.picks{position:static;order:-1}}
 .top-right .btn{white-space:nowrap}
 button.stat{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
@@ -237,7 +247,7 @@ button.stat span::after{content:" ›";color:var(--faint)}
 .crow:hover{background:var(--surface2)}
 .crumbs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:6px}
 .crumbs button{font:inherit;border:0;background:none;color:var(--accent);cursor:pointer;padding:0}
-.sticky{position:sticky;top:80px}
+.sticky{position:sticky;top:62px}
 @media (max-width:980px){.sticky{position:static}}
 /* phones: tables become stacked cards, nav wraps instead of hiding items, login button stays in reach */
 @media (max-width:640px){
@@ -250,15 +260,108 @@ button.stat span::after{content:" ›";color:var(--faint)}
   .tablewrap td[data-label]:not(.lead)::before{content:attr(data-label) " ";color:var(--faint);font-size:11px}
   .tablewrap td.lead{flex-basis:100%;order:-1;font-size:14px}
   .tablewrap td[colspan]{flex-basis:100%}
-  nav.side{flex-wrap:wrap;overflow:visible}
   .login-go{position:sticky;bottom:0;background:var(--surface);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));margin:0 -4px;border-top:1px solid var(--line);z-index:2}
-  .brand b{font-size:14px}
+  td.act{margin-left:auto}
   .toast{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}
   .pagehead h1{font-size:21px}
   .stat{padding:12px}
-  .stat b{font-size:22px}
+  .stat b{font-size:20px}
 }
 .big{font-size:22px;font-weight:600;line-height:1.3}
+/* ----- Record list: header (title, search, + add) · compact table + filter/detail panel · pagination ----- */
+.rl-head{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px}
+.rl-head .grow{min-width:220px}
+.rl-search{position:relative;width:260px;max-width:100%}
+.rl-search input{padding-left:30px;height:34px}
+.rl-head .btn.primary{height:34px}
+.rl-search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.rl{display:grid;grid-template-columns:minmax(0,1fr) 276px;gap:12px;align-items:start}
+.rl-box{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.rl-box .tablewrap{border:0;border-radius:0}
+table.rt{font-size:12.5px}
+table.rt th{padding:6px 10px;white-space:nowrap}
+table.rt td{padding:5px 10px;height:38px;white-space:nowrap}
+table.rt .chips{flex-wrap:nowrap}
+.th-sort{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;display:inline-flex;gap:3px;align-items:center}
+.th-sort:hover{color:var(--accent)}
+.th-sort i{font-style:normal;font-size:9px;color:var(--accent)}
+table.rt td.act,table.rt th.act{width:1%;white-space:nowrap;text-align:right;padding-right:6px}
+td.act .btn{padding:3px 6px;border-radius:6px}
+td.act .btn:hover{background:var(--surface2)}
+.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
+.rl-foot{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:7px 10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);background:var(--surface2)}
+.rl-foot select{width:auto;padding:3px 6px;font-size:12px}
+.pg{display:flex;gap:2px;align-items:center}
+.pg button{font:inherit;font-size:12px;min-width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;padding:0 6px}
+.pg button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+.pg button:disabled{opacity:.4;cursor:default}
+.pg span{padding:0 3px}
+.rl-active{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;font-size:12px;color:var(--muted)}
+.rl-active button{font:inherit;font-size:12px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 9px;cursor:pointer}
+.rl-active button.clear{border-color:transparent;background:none;text-decoration:underline}
+.rl-panel{position:sticky;top:62px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rl-tabs{display:flex;border-bottom:1px solid var(--line);background:var(--surface2)}
+.rl-tabs button{flex:1;font:inherit;font-size:12.5px;font-weight:500;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);padding:8px;cursor:pointer}
+.rl-tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface);font-weight:600}
+.rl-pbody{padding:12px;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 130px);overflow:auto}
+.fsec h3{font-size:11px;font-weight:600;color:var(--faint);letter-spacing:.04em;margin-bottom:4px}
+.fopts{display:flex;flex-direction:column;gap:1px}
+.fopt{font:inherit;font-size:12.5px;color:var(--fg);display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:6px;cursor:pointer;border:0;background:none;text-align:left}
+.fopt::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--line)}
+.fopt:hover{background:var(--surface2)}
+.fopt[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.fopt[aria-pressed="true"]::before{border-color:var(--accent);background:radial-gradient(circle,var(--accent) 45%,transparent 50%)}
+.fopt .c{margin-left:auto;font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
+.dp-h{display:flex;gap:10px;align-items:flex-start}
+.dp-h b{font-size:14px}
+.dp-acts{display:flex;gap:6px;flex-wrap:wrap}
+.dp-acts .btn{flex:1}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mini div{background:var(--surface2);border-radius:7px;padding:6px 8px;text-align:center}
+.mini b{display:block;font-size:16px;font-variant-numeric:tabular-nums}.mini span{font-size:11px;color:var(--muted)}
+.mbar{display:inline-block;width:46px;height:5px;border-radius:3px;background:var(--surface2);border:1px solid var(--line);vertical-align:middle;margin-left:6px;overflow:hidden}
+.mbar i{display:block;height:100%;background:var(--accent)}.mbar i.w{background:var(--warn)}.mbar i.b{background:var(--bad)}
+@media (max-width:1180px){.rl{grid-template-columns:minmax(0,1fr) 260px}}
+@media (max-width:980px){
+  .rl{grid-template-columns:minmax(0,1fr)}
+  .rl-panel{position:static;order:-1}
+  .rl-pbody{max-height:none}
+  .fopts{flex-direction:row;flex-wrap:wrap;gap:4px}
+  .fopt{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px}
+  .fopt::before{display:none}
+  .fopt .c{margin-left:2px}
+  .fopt[aria-pressed="true"]{border-color:var(--accent)}
+  .rl-search{width:100%}
+  .rl-panel.collapsed .rl-pbody{display:none}
+  .rl-panel.collapsed .rl-tabs{border-bottom:0}
+}
+@media (max-width:640px){.rl-head{flex-direction:column;align-items:stretch}.rl-head .grow{min-width:0}table.rt td{height:auto;white-space:normal}table.rt td.act{width:auto;padding:0}table.rt .chips{flex-wrap:wrap}}
+/* ----- Modal form (2 columns; bottom sheet with 1 column on phones) ----- */
+.modal-bg{position:fixed;inset:0;background:rgb(10 14 20/.45);z-index:40;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);color:var(--fg);border-radius:12px;width:min(720px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;box-shadow:0 24px 60px rgb(0 0 0/.28)}
+.modal.sm{width:min(440px,100%)}
+.modal-h{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.modal-h h2{font-size:15px}
+.modal-b{padding:14px 16px;overflow:auto}
+.modal-f{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);background:var(--surface2);border-radius:0 0 12px 12px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.fgrid .span2{grid-column:1/-1}
+.fsect{grid-column:1/-1;font-size:11.5px;font-weight:600;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:3px;margin-top:4px;letter-spacing:.02em}
+.fsect:first-child{margin-top:0}
+label.f .rq{color:var(--bad)}
+label.f .err{color:var(--bad);font-weight:400;font-size:11.5px}
+label.f .hint{color:var(--faint);font-weight:400;font-size:11.5px}
+label.f.bad input,label.f.bad select,label.f.bad textarea{border-color:var(--bad)}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--fg);cursor:pointer}
+.chk input{margin-top:3px;accent-color:var(--accent)}
+.ruleline{font-size:11.5px;display:flex;flex-direction:column;gap:1px}
+@media (max-width:640px){
+  .modal-bg{padding:0;place-items:end stretch}
+  .modal,.modal.sm{width:100%;border-radius:14px 14px 0 0;max-height:94vh}
+  .fgrid{grid-template-columns:1fr}
+  .modal-f{border-radius:0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .modal-f .btn{flex:1}
+}
 </style>
 
 </head>
@@ -284,6 +387,7 @@ const COURTS=[
   ["st-p","ศาลจังหวัดสุโขทัย","สุโขทัย",2],["ut-p","ศาลจังหวัดอุตรดิตถ์","อุตรดิตถ์",2],["kp-p","ศาลจังหวัดกำแพงเพชร","กำแพงเพชร",2]
 ].map(([id,name,prov,seats])=>({id,name,prov,seats,region:PROV[prov][2]}));
 const C=Object.fromEntries(COURTS.map(c=>[c.id,c]));
+const COURTS0=COURTS.map(c=>({...c}));
 const POS={p:"ผู้พิพากษาศาลจังหวัด",m:"ผู้พิพากษาศาลแขวง",j:"ผู้พิพากษาศาลเยาวชนและครอบครัว"};
 const posOf=cid=>POS[cid.split("-")[1]];
 
@@ -381,12 +485,14 @@ const mustMoveRaw=j=>j.months>=72;
 /* =========================================================
    State
    ========================================================= */
-let JUDGES,J,S;
+let JUDGES,J,S,NATION=null,NIDX={};
 const DEFAULT_RULES=()=>({T02:{on:true,cap:72},T03:{on:true},R01:{on:true,years:4},C01:{mode:"warn"},C02:{on:true},C03:{on:true}});
 let RULES=DEFAULT_RULES();
 function init(){
+  // courts can be added/edited in the register, so a reset restores the original list
+  COURTS.splice(0,COURTS.length,...COURTS0.map(c=>({...c})));for(const k in C)delete C[k];COURTS.forEach(c=>C[c.id]=c);NATION=null;
   JUDGES=buildJudges();J=Object.fromEntries(JUDGES.map(j=>[j.id,j]));RULES=DEFAULT_RULES();
-  S={user:null,pick:"judge",page:null,phase:0,result:null,locks:{},reminded:{},ktNote:"",ktDecision:null,sel:null,filter:"all",rfilter:"all",step:0,log:[],seen:{},qf:{status:"all",region:"all",flag:null},q:"",nsel:"root",nreg:null,detail:null,back:null,openCourt:null};
+  S={user:null,pick:"judge",page:null,phase:0,result:null,locks:{},reminded:{},ktNote:"",ktDecision:null,sel:null,filter:"all",rfilter:"all",step:0,log:[],seen:{},qf:{status:"all",region:"all",flag:null},q:"",nsel:"root",nreg:null,detail:null,back:null,openCourt:null,rl:{},modal:null,confirm:null,drawer:false};
   S.log=[
     {t:"1 ธ.ค. 2569 09:00",who:"สำนักงานศาลยุติธรรม",what:"เปิดรอบการโยกย้าย มีผล 1 เม.ย. 2570 รับคำขอถึง 15 ม.ค. 2570"},
     {t:"2 ธ.ค. 2569 08:41",who:"นายวิชัย ศรีสุข",what:"ยื่นคำขอย้าย 3 อันดับ"},
@@ -574,10 +680,10 @@ function renderLogin(){
    Shell
    ========================================================= */
 const NAV={
-  judge:[["home","หน้าหลัก"],["wish","ยื่นความประสงค์"],["result","ผลการโยกย้าย"],["history","ประวัติวาระ"],["nation","ผังศาลทั้งหมด"]],
-  region:[["rhome","ภาพรวมภาค 5"],["review","ตรวจสอบคำขอ"],["org","ที่นั่งในภาค 5"],["nation","ผังศาลทั้งหมด"]],
-  central:[["chome","ภาพรวมรอบ"],["reqs","คำขอทั้งหมด"],["run","ผลการจัดวาง"],["nation","ผังศาลทั้งหมด"],["org","ที่นั่งรอบนี้"],["rules","กฎและข้อจำกัด"],["log","บันทึกการดำเนินการ"]],
-  kt:[["khome","ร่างบัญชีเสนอ"],["reqs","คำขอทั้งหมด"],["nation","ผังศาลทั้งหมด"],["org","ที่นั่งรอบนี้"],["log","บันทึกการดำเนินการ"]],
+  judge:[["home","หน้าหลัก","ของฉัน"],["wish","ยื่นความประสงค์","ของฉัน"],["result","ผลการโยกย้าย","ของฉัน"],["history","ประวัติวาระ","ของฉัน"],["nation","ผังศาลทั้งหมด","ภาพรวม"]],
+  region:[["rhome","ภาพรวมภาค 5","งานของภาค"],["review","ตรวจสอบคำขอ","งานของภาค"],["judges","ผู้พิพากษาในภาค 5","ทะเบียน"],["org","ที่นั่งในภาค 5","ภาพรวม"],["nation","ผังศาลทั้งหมด","ภาพรวม"]],
+  central:[["chome","ภาพรวมรอบ","งานรอบนี้"],["reqs","คำขอทั้งหมด","งานรอบนี้"],["run","ผลการจัดวาง","งานรอบนี้"],["judges","ทะเบียนผู้พิพากษา","ทะเบียน"],["courts","ทะเบียนศาล","ทะเบียน"],["nation","ผังศาลทั้งหมด","ภาพรวม"],["org","ที่นั่งรอบนี้","ภาพรวม"],["rules","กฎและข้อจำกัด","ตั้งค่าและบันทึก"],["log","บันทึกการดำเนินการ","ตั้งค่าและบันทึก"]],
+  kt:[["khome","ร่างบัญชีเสนอ","พิจารณา"],["reqs","คำขอทั้งหมด","พิจารณา"],["judges","ทะเบียนผู้พิพากษา","ทะเบียน"],["courts","ทะเบียนศาล","ทะเบียน"],["nation","ผังศาลทั้งหมด","ภาพรวม"],["org","ที่นั่งรอบนี้","ภาพรวม"],["log","บันทึกการดำเนินการ","ภาพรวม"]],
 };
 function navCount(role,page){
   if(role==="region"&&page==="review")return JUDGES.filter(j=>inRegion(j,5)&&pendingDocs(j)).length;
@@ -586,32 +692,44 @@ function navCount(role,page){
   if(role==="judge"&&page==="wish"&&S.phase===0&&CUR().req.status!=="submitted")return 1;
   return 0;
 }
+function navHtml(u){let g=null;return NAV[u.role].map(([k,v,grp])=>{const c=navCount(u.role,k);const h=grp!==g?`<div class="grp">${esc(grp)}</div>`:"";g=grp;
+  return`${h}<button data-act="nav" data-arg="${k}" ${(S.page==="req"?S.back:S.page)===k?'aria-current="page"':""}>${ICO[k]||""}<span>${esc(v)}</span>${c?`<span class="cnt">${c}</span>`:""}</button>`}).join("")}
+function pageTitle(){if(S.page==="req")return(NAV[S.user.role].find(x=>x[0]===S.back)||[,"คำขอ"])[1]+" › "+(J[S.detail]?J[S.detail].name:"");return(NAV[S.user.role].find(x=>x[0]===S.page)||[,""])[1]}
 function render(){
-  if(!S.user){renderLogin();return}
+  if(!S.user){renderLogin();document.body.style.overflow="";return}
   const u=S.user,n=notes();
-  root.innerHTML=`<header class="top"><div class="topin pad">
-      <div class="brand"><div class="logo">${LOGO}</div><div><b>ระบบโยกย้ายผู้พิพากษา</b><br><span>รอบมีผล 1 เม.ย. 2570 · ${esc(PH[S.phase])}</span></div></div>
-      <span class="proto">ต้นแบบ · ข้อมูลสมมติ</span>
-      <div class="top-right">
-        <button class="btn icon ghost bell" data-act="nav" data-arg="${NAV[u.role][0][0]}" aria-label="การแจ้งเตือน ${n.length} รายการ" title="การแจ้งเตือน"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>${n.length?`<em>${n.length}</em>`:""}</button>
-        <div class="who"><span class="av sm">${u.init}</span><span class="txt"><b>${esc(u.name)}</b><small>${esc(u.roleName)}</small></span></div>
-        <button class="btn small" data-act="logout">สลับบทบาท</button>
-      </div></div></header>
-    <div class="shell pad">
-      <nav class="side" aria-label="เมนู">
-        <div class="grp">${esc(u.org)}</div>
-        ${NAV[u.role].map(([k,v])=>{const c=navCount(u.role,k);return`<button data-act="nav" data-arg="${k}" ${(S.page==="req"?S.back:S.page)===k?'aria-current="page"':""}>${esc(v)}${c?`<span class="cnt">${c}</span>`:""}</button>`}).join("")}
-        <div class="phasebox"><b>ขั้นของรอบนี้</b><div class="small muted" style="margin:2px 0 8px">${esc(PH[S.phase])} · ${esc(PHD[S.phase])}</div><div class="bar"><i style="width:${(S.phase+1)/5*100}%"></i></div></div>
-      </nav>
-      <main id="main">${PAGES[S.page]()}</main>
-    </div>`;
+  const ms=root.querySelector(".modal-b"),mtop=ms?ms.scrollTop:0;
+  root.innerHTML=`<div class="app${S.drawer?" open":""}">
+    <div class="sb" role="navigation" aria-label="เมนู">
+      <div class="sb-brand"><div class="logo">${LOGO}</div><div><b>ระบบโยกย้ายผู้พิพากษา</b><span>สำนักงานศาลยุติธรรม</span></div></div>
+      <div class="sb-org">${esc(u.org)}</div>
+      <nav class="side">${navHtml(u)}</nav>
+      <div class="phasebox"><b>ขั้นของรอบนี้</b><div class="small muted" style="margin:2px 0 8px">${esc(PH[S.phase])} · ${esc(PHD[S.phase])}</div><div class="bar"><i style="width:${(S.phase+1)/5*100}%"></i></div></div>
+      <div class="sb-user"><span class="av sm">${u.init}</span><span class="grow"><b>${esc(u.name)}</b><small>${esc(u.roleName)}</small></span><button class="btn icon ghost" data-act="logout" title="สลับบทบาท" aria-label="สลับบทบาท">${ICO.swap}</button></div>
+    </div>
+    <div class="scrim" data-act="drawer" data-arg="0"></div>
+    <div class="mainc">
+      <header class="top pad">
+        <button class="btn icon ghost burger" data-act="drawer" data-arg="1" aria-label="เปิดเมนู">${ICO.menu}</button>
+        <div class="crumb"><span class="sys">ระบบโยกย้ายผู้พิพากษา ›</span><b>${esc(pageTitle())}</b></div>
+        <span class="proto">ต้นแบบ · ข้อมูลสมมติ</span>
+        <div class="top-right">
+          <span class="pill info top-phase">รอบ 1 เม.ย. 70 · ${esc(PH[S.phase])}</span>
+          <button class="btn icon ghost bell" data-act="nav" data-arg="${NAV[u.role][0][0]}" aria-label="การแจ้งเตือน ${n.length} รายการ" title="การแจ้งเตือน"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>${n.length?`<em>${n.length}</em>`:""}</button>
+          <button class="btn small top-av" data-act="logout">สลับบทบาท</button>
+        </div></header>
+      <main id="main" class="pad">${PAGES[S.page]()}</main>
+    </div></div>${S.modal?modalHtml():""}${S.confirm?confirmHtml():""}`;
+  document.body.style.overflow=S.modal||S.confirm||S.drawer?"hidden":"";
   labelTables();
+  if(S.modal){const b=root.querySelector(".modal-b");if(S.modal.fresh){S.modal.fresh=false;const f=b.querySelector("input:not([readonly]),select:not([disabled]),textarea");if(f)f.focus({preventScroll:true})}else b.scrollTop=mtop}
+  else if(S.confirm){const x=root.querySelector(".modal-f .btn:last-child");if(x)x.focus()}
 }
 // copies each column header onto its cells so phone layouts can show them as stacked cards
-const LEAD=["ชื่อ","ศาล","จังหวัด"];
-function labelTables(){for(const t of root.querySelectorAll(".tablewrap table")){const hs=[...t.querySelectorAll("thead th")].map(th=>th.textContent.trim());
+const LEAD=["ชื่อ","ชื่อศาล","ศาล","จังหวัด"];
+function labelTables(){for(const t of root.querySelectorAll(".tablewrap table")){const hs=[...t.querySelectorAll("thead th")].map(th=>th.textContent.replace(/[▲▼]/g,"").trim());
   for(const tr of t.querySelectorAll("tbody tr"))[...tr.children].forEach((td,i)=>{if(td.hasAttribute("colspan")||!hs[i])return;td.dataset.label=hs[i];if(LEAD.includes(hs[i])&&!tr.querySelector(".lead"))td.classList.add("lead")})}}
-function revealAside(){if(innerWidth<=980){const a=root.querySelector("aside");if(a)a.scrollIntoView({behavior:"smooth",block:"start"})}}
+function revealAside(){if(innerWidth<=980){const a=root.querySelector("main aside");if(a)a.scrollIntoView({behavior:"smooth",block:"start"})}}
 function go(page){S.page=page;render();window.scrollTo({top:0})}
 
 /* =========================================================
@@ -985,31 +1103,6 @@ function pageKT(){
     ${m.map(j=>`<tr data-act="open" data-arg="${j.id}"><td class="n">#${fmt(j.sen)}</td><td>${esc(j.name)}</td><td>${esc(C[j.court].name)}</td><td><b>${esc(C[R[j.id].to].name)}</b></td><td>${pill(...statusOf(j))}</td></tr>`).join("")}</tbody></table></div>`}).join("")}`;
 }
 
-function matchQ(j){const f=S.qf,q=S.q.trim();
-  return(f.status==="all"||j.req.status===f.status)&&(f.region==="all"||C[j.court].region===+f.region)
-    &&(!f.flag||(f.flag==="forced"&&mustMove(j))||(f.flag==="docs"&&pendingDocs(j))||(f.flag==="special"&&!!(j.req.special||(j.req.docs||[]).length))||(f.flag==="blocked"&&j.prefs.some(c=>blocked(j,c)))||(f.flag==="couple"&&j.req.couple))
-    &&(!q||j.name.includes(q)||String(j.sen).includes(q.replace(/\D/g,"")||"~"))}
-function pageReqs(){
-  const f=S.qf,all=JUDGES,rows=all.filter(matchQ);
-  const chip=(k,v,label,n)=>`<button data-act="qf" data-arg="${k}:${v}" aria-pressed="${k==="flag"?f.flag===v:f[k]===v}">${label}${n!=null?` · ${n}`:""}</button>`;
-  const by=(fn)=>all.filter(fn).length;
-  return`<div class="pagehead"><div class="grow"><h1>คำขอทั้งหมด</h1><p class="sub">รอบมีผล 1 เม.ย. 2570 · ${all.length} คนใน ${COURTS.length} ศาล · คลิกแถวเพื่อเปิดคำขอฉบับเต็ม</p></div>
-    <input type="text" id="q" class="search" placeholder="ค้นหาชื่อหรือเลขอาวุโส" value="${esc(S.q)}" aria-label="ค้นหา"></div>
-  <div class="card" style="padding:12px 14px;margin-bottom:12px">
-    <div class="fgroup filters" style="margin-bottom:8px"><span>สถานะ</span>${chip("status","all","ทั้งหมด",all.length)}${chip("status","submitted","ส่งแล้ว",by(j=>j.req.status==="submitted"))}${chip("status","draft","มีร่าง",by(j=>j.req.status==="draft"))}${chip("status","none","ยังไม่ยื่น",by(j=>j.req.status==="none"))}</div>
-    <div class="fgroup filters" style="margin-bottom:8px"><span>ภาค</span>${chip("region","all","ทุกภาค")}${chip("region","5","ภาค 5",by(j=>inRegion(j,5)))}${chip("region","6","ภาค 6",by(j=>inRegion(j,6)))}</div>
-    <div class="fgroup filters" style="margin-bottom:0"><span>เฉพาะ</span>${chip("flag","forced","ครบวาระ",by(mustMove))}${chip("flag","docs","เอกสารรอตรวจ",by(pendingDocs))}${chip("flag","special","มีเหตุผลพิเศษหรือเอกสาร",by(j=>!!(j.req.special||(j.req.docs||[]).length)))}${chip("flag","blocked","มีตัวเลือกติดกฎ",by(j=>j.prefs.some(c=>blocked(j,c))))}${chip("flag","couple","ยื่นแบบคู่",by(j=>j.req.couple))}</div>
-  </div>
-  <p class="small muted" style="margin:0 0 8px">แสดง ${rows.length} จาก ${all.length} รายการ</p>
-  <div class="tablewrap"><table class="click" style="min-width:860px"><thead><tr><th>อาวุโส</th><th>ชื่อ</th><th>ศาลปัจจุบัน</th><th>ความประสงค์</th><th>คำขอ</th><th>เอกสาร</th><th>ยื่นเมื่อ</th></tr></thead><tbody>
-  ${rows.map(j=>`<tr data-act="open" data-arg="${j.id}"><td class="n">#${fmt(j.sen)}</td>
-    <td><b>${esc(j.name)}</b>${mustMove(j)?' <span class="pill warn">ครบวาระ</span>':""}${j.req.couple?' <span class="pill gold">คู่</span>':""}</td>
-    <td>${esc(shortC(j.court))} <span class="faint small">ภาค ${C[j.court].region}</span></td>
-    <td><div class="chips">${j.prefs.map((c,i)=>`<span class="chip ${blocked(j,c)?"x":""}" title="${blocked(j,c)?"ติดกฎ":""}">${i+1}. ${esc(shortC(c))}</span>`).join("")||'<span class="faint">–</span>'}</div></td>
-    <td>${reqPill(j)}</td><td>${(j.req.docs||[]).length?docPill(j.req.docs.find(d=>d.status!=="ok")||j.req.docs[0]):'<span class="faint">–</span>'}</td>
-    <td class="small muted">${esc(j.req.at||"–")}</td></tr>`).join("")||`<tr><td colspan="7" class="empty-state">ไม่พบคำขอที่ตรงตัวกรอง</td></tr>`}
-  </tbody></table></div>`;
-}
 function pageReq(){
   const j=J[S.detail],role=S.user.role;
   const canVerify=((role==="region"&&inRegion(j,5))||role==="central")&&S.phase<3;
@@ -1079,7 +1172,6 @@ const NREG={
 const REGNAME={0:"ศาลชั้นต้นในกรุงเทพมหานคร",1:"ภาคกลาง",2:"ภาคตะวันออก",3:"ภาคอีสานตอนล่าง",4:"ภาคอีสานตอนบน",5:"ภาคเหนือตอนบน",6:"ภาคเหนือตอนล่าง",7:"ภาคตะวันตก",8:"ภาคใต้ตอนบน",9:"ภาคใต้ตอนล่าง"};
 const BKK=["ศาลแพ่ง","ศาลแพ่งกรุงเทพใต้","ศาลแพ่งธนบุรี","ศาลแพ่งมีนบุรี","ศาลอาญา","ศาลอาญากรุงเทพใต้","ศาลอาญาธนบุรี","ศาลอาญามีนบุรี","ศาลแขวงพระนครเหนือ","ศาลแขวงพระนครใต้","ศาลแขวงดุสิต","ศาลแขวงปทุมวัน","ศาลแขวงธนบุรี","ศาลแขวงตลิ่งชัน","ศาลแขวงดอนเมือง","ศาลเยาวชนและครอบครัวกลาง"];
 const SPEC=["ศาลแรงงานกลาง","ศาลภาษีอากรกลาง","ศาลทรัพย์สินทางปัญญาและการค้าระหว่างประเทศกลาง","ศาลล้มละลายกลาง","ศาลอาญาคดีทุจริตและประพฤติมิชอบกลาง"];
-let NATION=null,NIDX={};
 function buildNation(){
   const R=rng(424242),n=(a,b)=>a+Math.floor(R()*(b-a+1));
   const mk=(id,name,kind,seats)=>{const filled=Math.max(1,seats-n(0,Math.max(1,Math.ceil(seats*.12))));
@@ -1262,12 +1354,344 @@ function pageNationRegion(){
     ${nodePanel()}
   </div>`;
 }
-const PAGES={nation:pageNation,reqs:pageReqs,req:pageReq,home:pageJudgeHome,wish:pageWish,result:pageResult,history:pageHistory,rhome:pageRegionHome,review:pageReview,org:pageOrg,chome:pageCentralHome,run:pageRun,rules:pageRules,log:pageLog,khome:pageKT};
+/* =========================================================
+   Record lists (คำขอ · ผู้พิพากษา · ศาล)
+   Header with title, search and "+ เพิ่ม", a compact table with sorting, pagination and edit/delete per row,
+   and a side panel that holds the filters or the selected record. Add/edit open a 2-column form in a modal.
+   ========================================================= */
+const SV=(d,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICO={
+  search:SV('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',15),
+  edit:SV('<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',15),
+  trash:SV('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',15),
+  open:SV('<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>',15),
+  x:SV('<path d="M6 6l12 12M18 6 6 18"/>',16),
+  menu:SV('<path d="M4 7h16M4 12h16M4 17h16"/>',20),
+  swap:SV('<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',16),
+  home:SV('<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'),
+  wish:SV('<path d="M4 20h4L19 9l-4-4L4 16v4z"/>'),
+  result:SV('<circle cx="12" cy="12" r="8"/><path d="m8.5 12 2.5 2.5 4.5-5"/>'),
+  history:SV('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),
+  nation:SV('<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>'),
+  rhome:SV('<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>'),
+  review:SV('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12l2 2 4-4"/>'),
+  judges:SV('<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3 2.8 3 6"/>'),
+  courts:SV('<path d="M3 21h18M5 21V10M19 21V10M9 21v-7h6v7M2 10l10-6 10 6z"/>'),
+  org:SV('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 10v10"/>'),
+  reqs:SV('<path d="M4 13h4l2 3h4l2-3h4M4 13l2-8h12l2 8v6H4z"/>'),
+  run:SV('<path d="M4 7h3l10 10h3M4 17h3l3-3M14 10l3-3h3M18 4l3 3-3 3M18 14l3 3-3 3"/>'),
+  rules:SV('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'),
+  log:SV('<path d="M8 6h12M8 12h12M8 18h12M4 6h0M4 12h0M4 18h0"/>'),
+  khome:SV('<path d="M14 4l6 6-3 3-6-6zM11 7l-7 7 3 3 7-7M3 21h10"/>'),
+};
+ICO.chome=ICO.rhome;
+
+function rlState(k){return S.rl[k]||(S.rl[k]={pg:1,size:15,sort:null,dir:1,sel:null,tab:"f",q:"",f:{}})}
+function pageNums(p,n){const s=new Set([1,n,p-1,p,p+1]);const a=[...s].filter(x=>x>=1&&x<=n).sort((x,y)=>x-y);const out=[];a.forEach((x,i)=>{if(i&&x-a[i-1]>1)out.push("…");out.push(x)});return out}
+function recordList(o){
+  const k=o.key,st=rlState(k),q=st.q.trim();
+  let rows=o.rows.filter(r=>(!q||o.search(r,q))&&o.filters.every(fl=>{const v=st.f[fl.k];return v==null||v==="all"||fl.test(r,v)}));
+  if(st.sort!=null&&o.cols[st.sort]){const col=o.cols[st.sort];rows=rows.slice().sort((a,b)=>{const x=col.sort(a),y=col.sort(b);return(x<y?-1:x>y?1:0)*st.dir})}
+  const total=rows.length,pages=Math.max(1,Math.ceil(total/st.size));if(st.pg>pages)st.pg=pages;
+  const from=(st.pg-1)*st.size,view=rows.slice(from,from+st.size);
+  const sel=st.sel!=null?o.rows.find(r=>o.id(r)===st.sel):null;if(st.sel!=null&&!sel){st.sel=null}
+  const active=o.filters.filter(fl=>st.f[fl.k]!=null&&st.f[fl.k]!=="all");
+  const optLabel=(fl,v)=>(fl.opts.find(x=>x[0]===v)||[,v])[1];
+  const head=`<div class="rl-head"><div class="grow"><h1>${esc(o.title)}</h1><p class="sub">${o.sub}</p></div>
+    <label class="rl-search">${ICO.search}<input type="search" id="q-${k}" data-rlq="${k}" placeholder="${esc(o.ph)}" value="${esc(st.q)}" aria-label="${esc(o.ph)}" autocomplete="off"></label>
+    ${o.add?`<button class="btn primary" data-act="madd" data-arg="${o.add.kind}" ${o.add.off?`disabled title="${esc(o.add.off)}"`:""}>＋ ${esc(o.add.label)}</button>`:""}</div>
+    ${o.add&&o.add.off||o.note?`<p class="small muted" style="margin:-4px 0 8px">${esc(o.note||o.add.off)}</p>`:""}`;
+  const chips=active.length||q?`<div class="rl-active"><span>ตัวกรอง:</span>${active.map(fl=>`<button data-act="rlf" data-arg="${k}|${fl.k}|all" title="เอาตัวกรองนี้ออก">${esc(fl.label)}: ${esc(optLabel(fl,st.f[fl.k]))} ✕</button>`).join("")}${q?`<button data-act="rlqclear" data-arg="${k}" title="ล้างคำค้น">“${esc(q)}” ✕</button>`:""}<button class="clear" data-act="rlfclear" data-arg="${k}">ล้างทั้งหมด</button></div>`:"";
+  const th=o.cols.map((c,i)=>`<th${c.cls?` class="${c.cls}"`:""}>${c.sort?`<button class="th-sort" data-act="rlsort" data-arg="${k}|${i}">${esc(c.h)}${st.sort===i?`<i>${st.dir>0?"▲":"▼"}</i>`:""}</button>`:esc(c.h)}</th>`).join("")+(o.actions?'<th class="act"></th>':"");
+  const body=view.map(r=>{const id=o.id(r);return`<tr data-act="rlsel" data-arg="${k}|${id}" class="${st.sel===id?"sel":""}">${o.cols.map(c=>`<td${c.cls?` class="${c.cls}"`:""}>${c.cell(r)}</td>`).join("")}${o.actions?`<td class="act">${o.actions(r)}</td>`:""}</tr>`}).join("")
+    ||`<tr><td colspan="${o.cols.length+(o.actions?1:0)}" class="empty-state">ไม่พบรายการที่ตรงกับตัวกรองหรือคำค้น</td></tr>`;
+  const foot=`<div class="rl-foot"><span>แสดง ${total?fmt(from+1):0}–${fmt(Math.min(total,from+st.size))} จาก ${fmt(total)} รายการ${total!==o.rows.length?` (ทั้งหมด ${fmt(o.rows.length)})`:""}</span><span class="grow"></span>
+    <label class="row" style="gap:6px">แถวต่อหน้า <select data-rlsize="${k}" aria-label="แถวต่อหน้า">${[10,15,25,50].map(n=>`<option ${n===st.size?"selected":""}>${n}</option>`).join("")}</select></label>
+    <div class="pg" role="navigation" aria-label="แบ่งหน้า"><button data-act="rlpg" data-arg="${k}|${st.pg-1}" ${st.pg<=1?"disabled":""} aria-label="หน้าก่อน">‹</button>${pageNums(st.pg,pages).map(n=>n==="…"?"<span>…</span>":`<button data-act="rlpg" data-arg="${k}|${n}" ${n===st.pg?'aria-current="page"':""}>${n}</button>`).join("")}<button data-act="rlpg" data-arg="${k}|${st.pg+1}" ${st.pg>=pages?"disabled":""} aria-label="หน้าถัดไป">›</button></div></div>`;
+  const filt=o.filters.map(fl=>`<div class="fsec"><h3>${esc(fl.label)}</h3><div class="fopts">${[["all","ทั้งหมด"],...fl.opts].map(([v,l])=>`<button class="fopt" data-act="rlf" data-arg="${k}|${fl.k}|${v}" aria-pressed="${(st.f[fl.k]||"all")===v}">${esc(l)}<span class="c">${fmt(v==="all"?o.rows.length:o.rows.filter(r=>fl.test(r,v)).length)}</span></button>`).join("")}</div></div>`).join("")
+    +(active.length?`<button class="btn small" data-act="rlfclear" data-arg="${k}">ล้างตัวกรอง</button>`:"");
+  const panel=`<div class="rl-panel${st.tab==="f"&&!st.fopen?" collapsed":""}" id="panel-${k}"><div class="rl-tabs" role="tablist"><button role="tab" aria-selected="${st.tab==="f"}" data-act="rltab" data-arg="${k}|f">ตัวกรอง${active.length?` (${active.length})`:""}</button><button role="tab" aria-selected="${st.tab==="d"}" data-act="rltab" data-arg="${k}|d">รายละเอียด</button></div>
+    <div class="rl-pbody">${st.tab==="f"?filt:sel?o.detail(sel):`<p class="muted small" style="margin:0">คลิกแถวในตารางเพื่อดูรายละเอียดที่นี่</p>`}</div></div>`;
+  return`${head}${chips}<div class="rl"><div class="rl-box"><div class="tablewrap"><table class="rt click" style="min-width:${o.minw||760}px"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>${foot}</div>${panel}</div>`;
+}
+const rowBtns=(kind,id,p)=>`${p.open?`<button class="btn icon ghost" data-act="open" data-arg="${p.open}" title="เปิดฉบับเต็ม" aria-label="เปิดฉบับเต็ม">${ICO.open}</button>`:""}${p.edit?`<button class="btn icon ghost" data-act="medit" data-arg="${kind}|${id}" title="แก้ไข" aria-label="แก้ไข">${ICO.edit}</button>`:""}${p.del?`<button class="btn icon ghost danger" data-act="mdel" data-arg="${kind}|${id}" title="ลบ" aria-label="ลบ">${ICO.trash}</button>`:""}`;
+const TMON={"ม.ค.":1,"ก.พ.":2,"มี.ค.":3,"เม.ย.":4,"พ.ค.":5,"มิ.ย.":6,"ก.ค.":7,"ส.ค.":8,"ก.ย.":9,"ต.ค.":10,"พ.ย.":11,"ธ.ค.":12};
+const dayIx=d=>{if(!d)return 9e9;const[x,m,y]=d.split(" ");return(+y)*400+(TMON[m]||0)*32+(+x)};
+const shortD=d=>d?d.replace(/ 25(\d\d)$/," $1"):"–";
+const posShort=cid=>({p:"ศาลจังหวัด",m:"ศาลแขวง",j:"เยาวชนฯ"})[cid.split("-")[1]];
+const REGOPTS=()=>[...new Set(COURTS.map(c=>c.region))].sort().map(r=>[String(r),"ภาค "+r]);
+
+/* ---------- permissions ---------- */
+const canReqEdit=()=>S.user.role==="central"&&S.phase===0;
+const reqOff=()=>S.user.role!=="central"?null:S.phase>0?"ปิดรับคำขอแล้ว บันทึกหรือแก้คำขอไม่ได้ในขั้นนี้":null;
+const regOff=()=>S.phase>=3?"ทะเบียนถูกล็อกระหว่างเสนอ ก.ต. และหลังประกาศผล":null;
+const canJudgeAdd=()=>S.user.role==="central"&&!regOff();
+const canJudgeEdit=j=>!regOff()&&(S.user.role==="central"||(S.user.role==="region"&&inRegion(j,5)));
+const PROTECTED=()=>new Set([...ACCOUNTS.filter(a=>a.judge).map(a=>a.judge),...COUPLES.flat()]);
+
+/* ---------- คำขอทั้งหมด ---------- */
+function reqDetail(j){
+  const can=canReqEdit();const text=j.req.special||j.req.reason;
+  return`<div class="dp-h"><span class="av sm">${esc(j.name.replace(/^(นางสาว|นาย|นาง)/,"").slice(0,2))}</span><div class="grow"><b>${esc(j.name)}</b><div class="small muted">#${fmt(j.sen)} · ${esc(C[j.court].name)} · ภาค ${C[j.court].region}</div></div><button class="btn icon ghost" data-act="rlclose" data-arg="reqs" aria-label="ปิด">${ICO.x}</button></div>
+    <div class="row" style="gap:6px">${reqPill(j)}${mustMove(j)?pill("warn","ครบวาระ"):""}${j.req.couple?pill("gold","ยื่นแบบคู่"):""}</div>
+    <div class="stack" style="gap:6px">${j.prefs.length?j.prefs.map((c,i)=>{const ch=check(j,c);return`<div class="step"><b>${i+1}. ${esc(C[c].name)}</b>${ch.length?ch.map(x=>`<span class="${x.sev==="block"?"r-bad":"r-warn"}">${x.sev==="block"?"✕":"!"} ${x.code} ${esc(x.msg)}</span>`).join(""):'<span class="r-ok">✓ ผ่านกฎ</span>'}</div>`}).join(""):`<p class="small muted" style="margin:0">ยังไม่ได้เลือกศาล</p>`}</div>
+    ${text?`<div class="note">${esc(text)}</div>`:""}
+    <dl class="kv"><dt>ยื่นเมื่อ</dt><dd>${esc(j.req.at||"–")}</dd><dt>เอกสาร</dt><dd>${(j.req.docs||[]).length?`${j.req.docs.length} ไฟล์ · รอตรวจ ${pendingDocs(j)}`:"ไม่มี"}</dd>${j.req.channel?`<dt>ช่องทาง</dt><dd>${esc(j.req.channel)}</dd>`:""}</dl>
+    <button class="btn primary" data-act="open" data-arg="${j.id}">เปิดคำขอฉบับเต็ม</button>
+    ${can?`<div class="dp-acts"><button class="btn small" data-act="medit" data-arg="req|${j.id}">${ICO.edit} ${j.req.status==="submitted"?"แก้ไขคำขอ":"บันทึกคำขอ"}</button>${j.req.status!=="none"?`<button class="btn small danger" data-act="mdel" data-arg="req|${j.id}">${ICO.trash} ยกเลิกคำขอ</button>`:""}</div>`:""}`;
+}
+function pageReqs(){
+  const can=canReqEdit(),isC=S.user.role==="central";
+  return recordList({key:"reqs",title:"คำขอทั้งหมด",ph:"ค้นหาชื่อหรือเลขอาวุโส",minw:800,
+    sub:`รอบมีผล 1 เม.ย. 2570 · ${JUDGES.length} คนใน ${COURTS.length} ศาล · คลิกแถวเพื่อดูรายละเอียด`,
+    add:isC?{kind:"req",label:"บันทึกคำขอ",off:reqOff()}:null,
+    rows:JUDGES,id:j=>j.id,search:(j,q)=>j.name.includes(q)||String(j.sen).includes(q.replace(/\D/g,"")||"~"),
+    filters:[
+      {k:"status",label:"สถานะคำขอ",opts:[["submitted","ส่งแล้ว"],["draft","มีร่าง"],["none","ยังไม่ยื่น"]],test:(j,v)=>j.req.status===v},
+      {k:"region",label:"ภาค",opts:REGOPTS(),test:(j,v)=>C[j.court].region===+v},
+      {k:"flag",label:"เฉพาะกรณี",opts:[["forced","ครบวาระ"],["docs","เอกสารรอตรวจ"],["special","มีเหตุผลพิเศษหรือเอกสาร"],["blocked","มีตัวเลือกติดกฎ"],["couple","ยื่นแบบคู่"]],
+        test:(j,v)=>(v==="forced"&&mustMove(j))||(v==="docs"&&!!pendingDocs(j))||(v==="special"&&!!(j.req.special||(j.req.docs||[]).length))||(v==="blocked"&&j.prefs.some(c=>blocked(j,c)))||(v==="couple"&&!!j.req.couple)},
+    ],
+    cols:[
+      {h:"อาวุโส",cls:"n",cell:j=>`#${fmt(j.sen)}`,sort:j=>j.sen},
+      {h:"ชื่อ",cell:j=>`<b>${esc(j.name)}</b>${mustMove(j)?' <span class="pill warn">ครบวาระ</span>':""}${j.req.couple?' <span class="pill gold">คู่</span>':""}`,sort:j=>j.name},
+      {h:"ศาลปัจจุบัน",cell:j=>esc(shortC(j.court)),sort:j=>C[j.court].region*1000+COURTS.indexOf(C[j.court])},
+      {h:"ความประสงค์",cell:j=>j.prefs.length?`<div class="chips" title="${esc(j.prefs.map((c,i)=>`${i+1}. ${C[c].name}${blocked(j,c)?" (ติดกฎ)":""}`).join("\n"))}"><span class="chip ${blocked(j,j.prefs[0])?"x":""}">1. ${esc(shortC(j.prefs[0]))}</span>${j.prefs.length>1?`<span class="chip">+${j.prefs.length-1}</span>`:""}${j.prefs.slice(1).some(c=>blocked(j,c))?'<span class="chip x" style="text-decoration:none">ติดกฎ</span>':""}</div>`:'<span class="faint">–</span>',sort:j=>j.prefs[0]?C[j.prefs[0]].name:"ฮ"},
+      {h:"สถานะ",cell:reqPill,sort:j=>["submitted","draft","none"].indexOf(j.req.status)},
+      {h:"เอกสาร",cell:j=>(j.req.docs||[]).length?docPill(j.req.docs.find(d=>d.status!=="ok")||j.req.docs[0]):'<span class="faint">–</span>',sort:j=>-pendingDocs(j)},
+      {h:"ยื่นเมื่อ",cls:"small muted",cell:j=>esc(shortD(j.req.at)),sort:j=>dayIx(j.req.at)},
+    ],
+    actions:j=>rowBtns("req",j.id,{open:can?null:j.id,edit:can,del:can&&j.req.status!=="none"}),
+    detail:reqDetail});
+}
+
+/* ---------- ทะเบียนผู้พิพากษา ---------- */
+function judgeDetail(j){
+  const ed=canJudgeEdit(j),del=S.user.role==="central"&&!regOff();
+  return`<div class="dp-h"><span class="av sm">${esc(j.name.replace(/^(นางสาว|นาย|นาง)/,"").slice(0,2))}</span><div class="grow"><b>${esc(j.name)}</b><div class="small muted">อาวุโส #${fmt(j.sen)} · ${esc(posOf(j.court))}</div></div><button class="btn icon ghost" data-act="rlclose" data-arg="judges" aria-label="ปิด">${ICO.x}</button></div>
+    <div class="row" style="gap:6px">${mustMove(j)?pill("warn","ครบวาระ ต้องย้าย"):pill("neutral",`เหลือ ${Math.max(0,RULES.T02.cap-j.months)} เดือนถึงวาระ`)}${reqPill(j)}</div>
+    <dl class="kv"><dt>ศาลปัจจุบัน</dt><dd>${esc(C[j.court].name)}</dd><dt>อยู่มาแล้ว</dt><dd>${j.months} เดือน</dd><dt>ภูมิลำเนา</dt><dd>จ.${esc(j.dom)}</dd>
+      <dt>คู่สมรส</dt><dd>${j.spouse?`${esc(j.spouse.job)} · จ.${esc(j.spouse.prov)}`:"ไม่มี"}</dd><dt>ผู้ที่ต้องดูแล</dt><dd>${j.mother?`บิดามารดา · จ.${esc(j.mother)}`:"ไม่มี"}</dd>
+      <dt>บุตร</dt><dd>${j.kids?`เรียนที่ จ.${esc(j.kids)}`:"ไม่มีข้อมูล"}</dd><dt>สุขภาพ</dt><dd>${j.health?"ต้องรักษาต่อเนื่อง":"ไม่มีข้อมูล"}</dd></dl>
+    <div><div class="small muted" style="margin-bottom:4px">ประวัติการดำรงตำแหน่ง</div><div class="list">${[{c:j.court,cur:true},...j.past.slice().sort((a,b)=>a.y-b.y)].map(r=>`<div class="li" style="padding:6px 0"><span class="grow">${esc(C[r.c]?C[r.c].name:r.c)}</span><span class="small muted">${r.cur?"ปัจจุบัน":`${r.m} เดือน · ${r.y} ปีก่อน`}</span></div>`).join("")}</div></div>
+    <button class="btn primary" data-act="open" data-arg="${j.id}">เปิดคำขอและประวัติเต็ม</button>
+    ${ed||del?`<div class="dp-acts">${ed?`<button class="btn small" data-act="medit" data-arg="judge|${j.id}">${ICO.edit} แก้ไข</button>`:""}${del?`<button class="btn small danger" data-act="mdel" data-arg="judge|${j.id}">${ICO.trash} ลบ</button>`:""}</div>`:""}`;
+}
+function pageJudges(){
+  const role=S.user.role,mine=role==="region";
+  const rows=mine?JUDGES.filter(j=>inRegion(j,5)):JUDGES;
+  const cap=RULES.T02.cap;
+  return recordList({key:"judges",title:mine?"ผู้พิพากษาในภาค 5":"ทะเบียนผู้พิพากษา",ph:"ค้นหาชื่อ เลขอาวุโส หรือศาล",minw:760,
+    sub:`${rows.length} คน${mine?" · แก้ไขข้อมูลครอบครัวและวาระได้ เพิ่มหรือลบต้องให้ส่วนกลางทำ":" · ข้อมูลที่ใช้จัดวาง แก้แล้วผลการจัดวางคำนวณใหม่ทันที"}`,
+    add:role==="central"?{kind:"judge",label:"เพิ่มผู้พิพากษา",off:regOff()}:null,note:role==="region"?regOff():null,
+    rows,id:j=>j.id,search:(j,q)=>j.name.includes(q)||C[j.court].name.includes(q)||String(j.sen).includes(q.replace(/\D/g,"")||"~"),
+    filters:[
+      ...(mine?[]:[{k:"region",label:"ภาค",opts:REGOPTS(),test:(j,v)=>C[j.court].region===+v}]),
+      {k:"pos",label:"ตำแหน่ง",opts:[["p","ผู้พิพากษาศาลจังหวัด"],["m","ผู้พิพากษาศาลแขวง"],["j","ผู้พิพากษาศาลเยาวชนฯ"]],test:(j,v)=>j.court.split("-")[1]===v},
+      {k:"term",label:"วาระ",opts:[["forced","ครบวาระแล้ว"],["soon","จะครบใน 12 เดือน"],["ok","ยังไม่ครบ"]],test:(j,v)=>v==="forced"?mustMove(j):v==="soon"?!mustMove(j)&&j.months>=cap-12:j.months<cap-12},
+      {k:"life",label:"เงื่อนไขชีวิต",opts:[["spouse","มีคู่สมรส"],["care","ดูแลบิดามารดา"],["kids","มีบุตรเรียนอยู่"],["health","ต้องรักษาต่อเนื่อง"]],test:(j,v)=>!!(v==="spouse"?j.spouse:v==="care"?j.mother:v==="kids"?j.kids:j.health)},
+      {k:"req",label:"คำขอรอบนี้",opts:[["submitted","ส่งแล้ว"],["draft","มีร่าง"],["none","ยังไม่ยื่น"]],test:(j,v)=>j.req.status===v},
+    ],
+    cols:[
+      {h:"อาวุโส",cls:"n",cell:j=>`#${fmt(j.sen)}`,sort:j=>j.sen},
+      {h:"ชื่อ",cell:j=>`<b>${esc(j.name)}</b>`,sort:j=>j.name},
+      {h:"ศาลปัจจุบัน",cell:j=>esc(C[j.court].name),sort:j=>C[j.court].name},
+      {h:"ภาค",cls:"n",cell:j=>C[j.court].region,sort:j=>C[j.court].region},
+      {h:"อยู่มาแล้ว",cell:j=>{const pc=Math.min(100,j.months/cap*100);return`<span style="font-variant-numeric:tabular-nums">${j.months} ด.</span><span class="mbar"><i class="${j.months>=cap?"b":pc>80?"w":""}" style="width:${pc}%"></i></span>`},sort:j=>j.months},
+      {h:"วาระ",cell:j=>mustMove(j)?pill("warn","ครบวาระ"):j.months>=cap-12?pill("info","ใกล้ครบ"):pill("neutral","ยังไม่ครบ"),sort:j=>-j.months},
+      {h:"คำขอ",cell:reqPill,sort:j=>["submitted","draft","none"].indexOf(j.req.status)},
+    ],
+    actions:j=>rowBtns("judge",j.id,{edit:canJudgeEdit(j),del:role==="central"&&!regOff()}),
+    detail:judgeDetail});
+}
+
+/* ---------- ทะเบียนศาล ---------- */
+function courtStat(c){const h=JUDGES.filter(j=>j.court===c.id);return{h,vac:c.seats-h.length,forced:h.filter(mustMove).length,apply:JUDGES.filter(j=>sub(j).includes(c.id)).length,first:JUDGES.filter(j=>sub(j)[0]===c.id).length}}
+function courtDetail(c){
+  const s=courtStat(c),can=S.user.role==="central"&&!regOff();
+  return`<div class="dp-h"><span class="logo" style="width:30px;height:30px">${ICO.courts}</span><div class="grow"><b>${esc(c.name)}</b><div class="small muted"><span class="mono">${esc(c.id)}</span> · จ.${esc(c.prov)} · ภาค ${c.region}</div></div><button class="btn icon ghost" data-act="rlclose" data-arg="courts" aria-label="ปิด">${ICO.x}</button></div>
+    <div class="mini"><div><b>${c.seats}</b><span>อัตรา</span></div><div><b>${s.h.length}</b><span>มีคน</span></div><div><b style="color:${s.vac>0?"var(--ok)":s.vac<0?"var(--bad)":"inherit"}">${s.vac}</b><span>ว่าง</span></div><div><b>${s.apply}</b><span>ขอเข้า</span></div></div>
+    <div><div class="small muted" style="margin-bottom:4px">ผู้พิพากษาในศาลนี้ (${s.h.length})</div>
+      ${s.h.length?`<div class="seats" style="margin:0">${s.h.map(j=>`<div class="seat" data-act="open" data-arg="${j.id}" title="เปิดคำขอ"><span class="grow">${esc(j.name)} <span class="muted">#${fmt(j.sen)}</span></span>${mustMove(j)?pill("warn","ครบวาระ"):""}</div>`).join("")}</div>`:`<p class="small muted" style="margin:0">ยังไม่มีผู้พิพากษา</p>`}</div>
+    ${s.apply?`<div><div class="small muted" style="margin-bottom:4px">ผู้ที่ขอเข้า (${s.apply})</div><div class="chips">${JUDGES.filter(j=>sub(j).includes(c.id)).slice(0,8).map(j=>`<span class="chip">#${fmt(j.sen)} อันดับ ${sub(j).indexOf(c.id)+1}</span>`).join("")}${s.apply>8?`<span class="chip">+${s.apply-8}</span>`:""}</div></div>`:""}
+    <button class="btn primary" data-act="court" data-arg="${c.id}">ดูที่นั่งในผังศาล</button>
+    ${can?`<div class="dp-acts"><button class="btn small" data-act="medit" data-arg="court|${c.id}">${ICO.edit} แก้ไข</button><button class="btn small danger" data-act="mdel" data-arg="court|${c.id}">${ICO.trash} ลบศาล</button></div>`:""}`;
+}
+function pageCourts(){
+  const can=S.user.role==="central"&&!regOff();
+  return recordList({key:"courts",title:"ทะเบียนศาล",ph:"ค้นหาชื่อศาล จังหวัด หรือรหัส",minw:860,
+    sub:`${COURTS.length} ศาลชั้นต้นในรอบนี้ · ${COURTS.reduce((a,c)=>a+c.seats,0)} อัตรา · อัตราที่นั่งใช้เป็นเพดานตอนจัดวาง`,
+    add:S.user.role==="central"?{kind:"court",label:"เพิ่มศาล",off:regOff()}:null,
+    rows:COURTS,id:c=>c.id,search:(c,q)=>c.name.includes(q)||c.prov.includes(q)||c.id.includes(q),
+    filters:[
+      {k:"region",label:"ภาค",opts:REGOPTS(),test:(c,v)=>c.region===+v},
+      {k:"type",label:"ประเภทศาล",opts:[["p","ศาลจังหวัด"],["m","ศาลแขวง"],["j","ศาลเยาวชนและครอบครัว"]],test:(c,v)=>c.id.split("-")[1]===v},
+      {k:"seat",label:"ที่นั่ง",opts:[["vac","มีที่ว่าง"],["full","เต็ม"]],test:(c,v)=>{const s=courtStat(c);return v==="vac"?s.vac>0:s.vac<=0}},
+      {k:"demand",label:"ความต้องการ",opts:[["high","แข่งขันสูง"],["low","อาจขาดคน"]],test:(c,v)=>{const s=courtStat(c);return v==="high"?s.first>s.vac+s.forced:s.vac+s.forced>s.first}},
+    ],
+    cols:[
+      {h:"รหัส",cell:c=>`<span class="mono">${esc(c.id)}</span>`,sort:c=>c.id},
+      {h:"ชื่อศาล",cell:c=>`<b>${esc(c.name)}</b>`,sort:c=>c.name},
+      {h:"ประเภท",cell:c=>esc(posShort(c.id)),sort:c=>c.id.split("-")[1]},
+      {h:"จังหวัด",cell:c=>esc(c.prov),sort:c=>c.prov},
+      {h:"ภาค",cls:"n",cell:c=>c.region,sort:c=>c.region},
+      {h:"อัตรา",cls:"n",cell:c=>c.seats,sort:c=>c.seats},
+      {h:"มีคน",cls:"n",cell:c=>courtStat(c).h.length,sort:c=>courtStat(c).h.length},
+      {h:"ว่าง",cls:"n",cell:c=>{const v=courtStat(c).vac;return v>0?`<b style="color:var(--ok)">${v}</b>`:v},sort:c=>courtStat(c).vac},
+      {h:"ครบวาระ",cls:"n",cell:c=>courtStat(c).forced,sort:c=>courtStat(c).forced},
+      {h:"ขอเข้า",cls:"n",cell:c=>courtStat(c).apply,sort:c=>courtStat(c).apply},
+    ],
+    actions:c=>rowBtns("court",c.id,{edit:can,del:can}),
+    detail:courtDetail});
+}
+
+/* ---------- forms ---------- */
+const PROVS=()=>Object.keys(PROV);
+const fld=(key,label,inner,o={})=>{const e=S.modal.err[key];return`<label class="f${e?" bad":""}${o.span?" span2":""}"><span>${esc(label)}${o.rq?' <span class="rq">*</span>':""}</span>${inner}${e?`<span class="err">${esc(e)}</span>`:o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`};
+const sel_=(key,opts,v,o={})=>`<select data-mf="${key}" ${o.dis?"disabled":""}>${opts.map(([x,l])=>`<option value="${esc(x)}" ${String(x)===String(v)?"selected":""}>${esc(l)}</option>`).join("")}</select>`;
+const inp=(key,v,o={})=>`<input type="${o.type||"text"}" data-mf="${key}" value="${esc(v==null?"":v)}" ${o.ph?`placeholder="${esc(o.ph)}"`:""} ${o.ro?"readonly":""} ${o.type==="number"?'inputmode="numeric"':""}>`;
+function openModal(kind,mode,id){
+  let d;
+  if(kind==="req"){const j=id?J[id]:null;d={jid:id||"",p1:j&&j.prefs[0]||"",p2:j&&j.prefs[1]||"",p3:j&&j.prefs[2]||"",reason:j?(j.req.special||j.req.reason||""):"",channel:(j&&j.req.channel)||"แบบฟอร์มกระดาษ",fallback:j?!!j.req.fallback:false,at:j&&j.req.at||DEMO_DATE}}
+  else if(kind==="judge"){const j=id?J[id]:null;
+    d=j?{name:j.name,sen:j.sen,court:j.court,months:j.months,dom:j.dom,sjob:j.spouse?j.spouse.job:"ไม่มีคู่สมรส",sprov:j.spouse?j.spouse.prov:"",mother:j.mother||"",kids:j.kids||"",health:!!j.health}
+      :{name:"",sen:"",court:"",months:0,dom:"",sjob:"ไม่มีคู่สมรส",sprov:"",mother:"",kids:"",health:false}}
+  else{const c=id?C[id]:null;d=c?{name:c.name,type:c.id.split("-")[1],prov:c.prov,seats:c.seats}:{name:"",type:"p",prov:"",seats:2}}
+  S.modal={kind,mode,id,d,err:{},fresh:true};render();
+}
+function reqForm(m){
+  const d=m.d,j=d.jid?J[d.jid]:null;
+  const cands=JUDGES.filter(x=>x.req.status!=="submitted").map(x=>[x.id,`#${fmt(x.sen)} ${x.name} · ${shortC(x.court)}`]);
+  const copts=[["","— ไม่เลือก —"],...COURTS.filter(c=>!j||c.id!==j.court).map(c=>[c.id,`${c.name} (ภาค ${c.region})`])];
+  const rl=(c)=>{if(!j||!c)return"";const ch=check(j,c);return`<span class="ruleline">${ch.length?ch.map(x=>`<span class="${x.sev==="block"?"r-bad":"r-warn"}">${x.sev==="block"?"✕":"!"} ${x.code} ${esc(x.msg)}</span>`).join(""):'<span class="r-ok">✓ ผ่านกฎทุกข้อ</span>'}</span>`};
+  return`<div class="fgrid">
+    <div class="fsect">ผู้ยื่นคำขอ</div>
+    ${m.mode==="add"?fld("jid","ผู้พิพากษา",sel_("jid",[["","— เลือกผู้พิพากษาที่ยังไม่ได้ส่งคำขอ —"],...cands],d.jid),{rq:1,span:1,hint:`มี ${cands.length} คนที่ยังไม่ได้ส่งคำขอ`})
+      :fld("jid","ผู้พิพากษา",inp("jx",`#${fmt(j.sen)} ${j.name}`,{ro:1}),{span:1})}
+    ${j?`<div class="span2 small muted" style="margin-top:-4px">${esc(C[j.court].name)} · อยู่มาแล้ว ${j.months} เดือน ${mustMove(j)?"· ครบวาระ ต้องย้าย":""}</div>`:""}
+    <div class="fsect">ความประสงค์ (เรียงตามลำดับ)</div>
+    ${fld("p1","อันดับ 1",sel_("p1",copts,d.p1)+rl(d.p1),{rq:1})}
+    ${fld("p2","อันดับ 2",sel_("p2",copts,d.p2)+rl(d.p2))}
+    ${fld("p3","อันดับ 3",sel_("p3",copts,d.p3)+rl(d.p3))}
+    ${fld("channel","ช่องทางที่รับคำขอ",sel_("channel",[["แบบฟอร์มกระดาษ","แบบฟอร์มกระดาษ"],["หนังสือราชการ","หนังสือราชการ"],["ยื่นผ่านระบบ","ยื่นผ่านระบบ"]],d.channel))}
+    <div class="fsect">รายละเอียดเพิ่มเติม</div>
+    ${fld("reason","เหตุผลประกอบ",`<textarea data-mf="reason" rows="3" placeholder="เช่น ต้องดูแลบิดามารดาที่ จ.ลำปาง">${esc(d.reason)}</textarea>`,{span:1})}
+    ${fld("at","วันที่รับคำขอ",inp("at",d.at,{ro:1}))}
+    <label class="chk" style="align-self:end"><input type="checkbox" data-mf="fallback" ${d.fallback?"checked":""}><span>ยินยอมให้ใช้เงื่อนไขจำเป็นหาที่ลง ถ้าครบวาระแต่ไม่ได้ทั้ง 3 ที่</span></label>
+  </div>`;
+}
+function judgeForm(m){
+  const d=m.d,provs=[["","— เลือก —"],...PROVS().map(p=>[p,p])],none=[["","ไม่มี"],...PROVS().map(p=>[p,p])];
+  const copts=[["","— เลือกศาล —"],...COURTS.map(c=>{const n=JUDGES.filter(j=>j.court===c.id&&j.id!==m.id).length;return[c.id,`${c.name} · ${n}/${c.seats}${n>=c.seats?" เต็ม":""}`]})];
+  const ro=S.user.role!=="central";
+  return`<div class="fgrid">
+    <div class="fsect">ข้อมูลตำแหน่ง</div>
+    ${fld("name","ชื่อ-นามสกุล",inp("name",d.name,{ph:"เช่น นายสมศักดิ์ ใจดี",ro}),{rq:1})}
+    ${fld("sen","ลำดับอาวุโส",inp("sen",d.sen,{type:"number",ph:"เช่น 1388",ro:m.mode==="edit"}),{rq:1,hint:m.mode==="edit"?"แก้ไม่ได้ ใช้เป็นรหัสอ้างอิง":"ตัวเลขน้อยคืออาวุโสกว่า"})}
+    ${fld("court","ศาลปัจจุบัน",sel_("court",copts,d.court,{dis:ro}),{rq:1,hint:"ตัวเลขคือ มีคน/อัตรา"})}
+    ${fld("months","อยู่ศาลปัจจุบันมาแล้ว (เดือน)",inp("months",d.months,{type:"number"}),{rq:1,hint:`ครบวาระที่ ${RULES.T02.cap} เดือน`})}
+    <div class="fsect">ครอบครัวและภูมิลำเนา</div>
+    ${fld("dom","ภูมิลำเนา",sel_("dom",provs,d.dom),{rq:1})}
+    ${fld("sjob","คู่สมรส",sel_("sjob",[["ไม่มีคู่สมรส","ไม่มีคู่สมรส"],["อัยการ","อัยการ"],["ทนายความ","ทนายความ"],["ผู้พิพากษา","ผู้พิพากษา"],["อาชีพอื่น","อาชีพอื่น"]],d.sjob))}
+    ${d.sjob!=="ไม่มีคู่สมรส"?fld("sprov","คู่สมรสทำงานที่จังหวัด",sel_("sprov",provs,d.sprov),{rq:1}):""}
+    ${fld("mother","บิดามารดาที่ต้องดูแล อยู่ที่",sel_("mother",none,d.mother))}
+    ${fld("kids","บุตรเรียนอยู่ที่",sel_("kids",none,d.kids))}
+    <label class="chk" style="align-self:end"><input type="checkbox" data-mf="health" ${d.health?"checked":""}><span>ต้องรักษาตัวต่อเนื่องที่โรงพยาบาลเดิม</span></label>
+  </div>`;
+}
+function courtForm(m){
+  const d=m.d,ed=m.mode==="edit";
+  return`<div class="fgrid">
+    <div class="fsect">ข้อมูลศาล</div>
+    ${fld("type","ประเภทศาล",sel_("type",[["p","ศาลจังหวัด"],["m","ศาลแขวง"],["j","ศาลเยาวชนและครอบครัว"]],d.type,{dis:ed}),{rq:1,hint:ed?"เปลี่ยนประเภทต้องตั้งเป็นศาลใหม่":""})}
+    ${fld("prov","จังหวัด",sel_("prov",[["","— เลือก —"],...PROVS().map(p=>[p,`${p} (ภาค ${PROV[p][2]})`])],d.prov),{rq:1})}
+    ${fld("name","ชื่อศาล",inp("name",d.name,{ph:d.prov?suggestName(d):"เลือกประเภทและจังหวัดก่อน"}),{rq:1,span:1,hint:"เว้นว่างไว้เพื่อใช้ชื่อตามประเภทและจังหวัด"})}
+    ${fld("seats","อัตราที่นั่ง",inp("seats",d.seats,{type:"number"}),{rq:1,hint:ed?`ตอนนี้มีผู้พิพากษา ${JUDGES.filter(j=>j.court===m.id).length} คน`:""})}
+    ${fld("rg","ภาค",inp("rg",d.prov?"ภาค "+PROV[d.prov][2]:"",{ro:1}),{hint:"ตามจังหวัด"})}
+  </div>`;
+}
+const suggestName=d=>d.type==="p"?`ศาลจังหวัด${d.prov}`:d.type==="m"?`ศาลแขวง${d.prov}`:`ศาลเยาวชนฯ จ.${d.prov}`;
+const MTITLE={req:["บันทึกคำขอย้าย","แก้ไขคำขอย้าย"],judge:["เพิ่มผู้พิพากษา","แก้ไขข้อมูลผู้พิพากษา"],court:["เพิ่มศาล","แก้ไขข้อมูลศาล"]};
+function modalHtml(){
+  const m=S.modal;const body=m.kind==="req"?reqForm(m):m.kind==="judge"?judgeForm(m):courtForm(m);
+  const n=Object.keys(m.err).length;
+  return`<div class="modal-bg"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><div class="modal-h"><h2 id="mt" class="grow">${MTITLE[m.kind][m.mode==="add"?0:1]}</h2><button class="btn icon ghost" data-act="mclose" aria-label="ปิด">${ICO.x}</button></div>
+    <div class="modal-b">${body}</div>
+    <div class="modal-f">${n?`<span class="small r-bad grow">ยังมี ${n} ช่องที่ต้องแก้</span>`:`<span class="small muted grow">ช่องที่มี <span class="rq" style="color:var(--bad)">*</span> ต้องกรอก</span>`}<button class="btn" data-act="mclose">ยกเลิก</button><button class="btn primary" data-act="msave">${m.mode==="add"?"บันทึก":"บันทึกการแก้ไข"}</button></div></div></div>`;
+}
+function confirmHtml(){const c=S.confirm;
+  return`<div class="modal-bg"><div class="modal sm" role="alertdialog" aria-modal="true" aria-labelledby="ct"><div class="modal-h"><h2 id="ct" class="grow">${esc(c.title)}</h2><button class="btn icon ghost" data-act="cclose" aria-label="ปิด">${ICO.x}</button></div>
+    <div class="modal-b stack" style="gap:8px">${c.body}</div>
+    <div class="modal-f">${c.ok?`<button class="btn" data-act="cclose">ยกเลิก</button><button class="btn primary" style="background:var(--bad);border-color:var(--bad);color:#fff" data-act="cdo">${esc(c.ok)}</button>`:`<button class="btn primary" data-act="cclose">เข้าใจแล้ว</button>`}</div></div></div>`;
+}
+function afterDataChange(){NATION=null;if(S.phase===2)rerun()}
+function saveModal(){
+  const m=S.modal,d=m.d,e={};
+  if(m.kind==="req"){
+    if(!d.jid)e.jid="เลือกผู้พิพากษา";if(!d.p1)e.p1="ต้องมีอย่างน้อย 1 อันดับ";
+    const ps=[d.p1,d.p2,d.p3].filter(Boolean);if(new Set(ps).size<ps.length){if(d.p2&&(d.p2===d.p1))e.p2="ซ้ำกับอันดับ 1";if(d.p3&&(d.p3===d.p1||d.p3===d.p2))e.p3="ซ้ำกับอันดับก่อนหน้า"}
+    if(!d.p1&&(d.p2||d.p3))e.p1="เลือกอันดับ 1 ก่อน";
+    m.err=e;if(Object.keys(e).length){render();return}
+    const j=J[d.jid],was=j.req.status;j.prefs=ps;j.req.status="submitted";j.req.at=was==="submitted"?j.req.at:DEMO_DATE;j.req.channel=d.channel;j.req.fallback=d.fallback;
+    if(j.req.special)j.req.special=d.reason;else j.req.reason=d.reason;
+    hist(j,`${m.mode==="add"||was!=="submitted"?"เจ้าหน้าที่บันทึกคำขอแทน":"เจ้าหน้าที่แก้ไขคำขอ"} ${ps.length} อันดับ (${d.channel})`);
+    log(`${was==="submitted"?"แก้ไข":"บันทึก"}คำขอของ ${j.name}: ${ps.map(c=>C[c].name).join(", ")}`);
+    S.modal=null;const st=rlState("reqs");st.sel=j.id;st.tab="d";render();toast(was==="submitted"?"บันทึกการแก้ไขแล้ว":"บันทึกคำขอแล้ว");return}
+  if(m.kind==="judge"){
+    const name=String(d.name).trim(),sen=parseInt(d.sen,10),months=parseInt(d.months,10);
+    if(name.length<4)e.name="กรอกชื่อ-นามสกุล";
+    if(m.mode==="add"){if(!(sen>0&&sen<100000))e.sen="กรอกตัวเลข 1–99999";else if(J["j"+sen])e.sen=`เลข ${sen} มีอยู่แล้ว (${J["j"+sen].name})`}
+    if(!d.court)e.court="เลือกศาล";else{const n=JUDGES.filter(j=>j.court===d.court&&j.id!==m.id).length;if(n>=C[d.court].seats&&(m.mode==="add"||J[m.id].court!==d.court))e.court=`ศาลนี้เต็มแล้ว (${n}/${C[d.court].seats}) เพิ่มอัตราในทะเบียนศาลก่อน`}
+    if(!(months>=0&&months<=240))e.months="0–240 เดือน";
+    if(!d.dom)e.dom="เลือกจังหวัด";if(d.sjob!=="ไม่มีคู่สมรส"&&!d.sprov)e.sprov="เลือกจังหวัด";
+    m.err=e;if(Object.keys(e).length){render();return}
+    const spouse=d.sjob==="ไม่มีคู่สมรส"?null:{job:d.sjob,prov:d.sprov};
+    if(m.mode==="add"){
+      const j={sen,id:"j"+sen,name,court:d.court,months,dom:d.dom,spouse,mother:d.mother||null,kids:d.kids||null,health:d.health,past:[],prefs:[],
+        req:{status:"none",at:null,docs:[],reason:"",fallback:false,hist:[]},cond:{near:false,km:120,sep:"court"}};
+      JUDGES.push(j);JUDGES.sort((a,b)=>a.sen-b.sen);J[j.id]=j;hist(j,"เพิ่มเข้าทะเบียนผู้พิพากษา");log(`เพิ่ม ${name} (#${sen}) เข้าทะเบียน ที่ ${C[d.court].name}`);
+      afterDataChange();S.modal=null;const st=rlState("judges");st.sel=j.id;st.tab="d";st.sort=null;st.q="";st.f={};st.pg=Math.floor(JUDGES.filter(x=>S.user.role!=="region"||inRegion(x,5)).indexOf(j)/st.size)+1;render();toast("เพิ่มผู้พิพากษาแล้ว");return}
+    const j=J[m.id],moved=j.court!==d.court;
+    Object.assign(j,{name,months,dom:d.dom,spouse:spouse&&j.spouse&&j.spouse.link?{...spouse,link:j.spouse.link}:spouse,mother:d.mother||null,kids:d.kids||null,health:d.health});
+    if(moved){j.court=d.court;j.prefs=j.prefs.filter(c=>c!==d.court)}
+    hist(j,"แก้ไขข้อมูลในทะเบียน");log(`แก้ไขข้อมูลทะเบียนของ ${name}`);afterDataChange();S.modal=null;render();toast(S.phase===2?"บันทึกแล้ว ร่างผลคำนวณใหม่":"บันทึกการแก้ไขแล้ว");return}
+  // court
+  const seats=parseInt(d.seats,10),name=(String(d.name).trim()||(d.prov?suggestName(d):""));
+  if(!d.prov)e.prov="เลือกจังหวัด";
+  if(!name)e.name="กรอกชื่อศาล";else if(COURTS.some(c=>c.name===name&&c.id!==m.id))e.name="มีศาลชื่อนี้แล้ว";
+  const held=m.id?JUDGES.filter(j=>j.court===m.id).length:0;
+  if(!(seats>=1&&seats<=60))e.seats="1–60";else if(seats<held)e.seats=`ต่ำกว่าคนที่อยู่ตอนนี้ (${held} คน)`;
+  m.err=e;if(Object.keys(e).length){render();return}
+  if(m.mode==="add"){let n=1;while(C[`n${n}-${d.type}`])n++;const c={id:`n${n}-${d.type}`,name,prov:d.prov,seats,region:PROV[d.prov][2]};COURTS.push(c);C[c.id]=c;
+    log(`เพิ่ม${name} (${seats} อัตรา) เข้าทะเบียนศาล`);afterDataChange();S.modal=null;const st=rlState("courts");st.sel=c.id;st.tab="d";st.sort=null;st.q="";st.f={};st.pg=Math.ceil(COURTS.length/st.size);render();toast("เพิ่มศาลแล้ว");return}
+  const c=C[m.id];Object.assign(c,{name,prov:d.prov,seats,region:PROV[d.prov][2]});log(`แก้ไขข้อมูล${name} (อัตรา ${seats})`);afterDataChange();S.modal=null;render();toast(S.phase===2?"บันทึกแล้ว ร่างผลคำนวณใหม่":"บันทึกการแก้ไขแล้ว");
+}
+function askDelete(kind,id){
+  if(kind==="req"){const j=J[id];S.confirm={kind,id,title:"ยกเลิกคำขอนี้?",ok:"ยกเลิกคำขอ",body:`<p style="margin:0">คำขอของ <b>${esc(j.name)}</b> จะกลับเป็น “ยังไม่ยื่น” และความประสงค์ ${j.prefs.length} อันดับจะถูกล้าง</p>${mustMove(j)?`<div class="note warn">รายนี้ครบวาระ ถ้าไม่มีคำขอ ระบบจะหาที่ลงให้จากที่นั่งที่เหลือ</div>`:""}<p class="small muted" style="margin:0">การยกเลิกถูกบันทึกในประวัติคำขอและบันทึกการดำเนินการ</p>`}}
+  else if(kind==="judge"){const j=J[id];
+    if(PROTECTED().has(id))S.confirm={title:"ลบรายนี้ไม่ได้",body:`<p style="margin:0"><b>${esc(j.name)}</b> ใช้เป็นบัญชีเดโมหรือยื่นแบบคู่อยู่ จึงลบออกจากทะเบียนในเดโมไม่ได้ ลองลบคนอื่น หรือเพิ่มคนใหม่แล้วลบ</p>`};
+    else S.confirm={kind,id,title:"ลบออกจากทะเบียน?",ok:"ลบ",body:`<p style="margin:0">ลบ <b>${esc(j.name)}</b> (#${fmt(j.sen)}) ออกจากทะเบียน เช่น เกษียณ ลาออก หรือย้ายไปศาลสูง</p><p style="margin:0">ที่นั่งที่ ${esc(C[j.court].name)} จะว่าง 1 ที่${S.phase===2?" และร่างผลจะคำนวณใหม่":""}</p>`}}
+  else{const c=C[id],h=JUDGES.filter(j=>j.court===id).length,ap=JUDGES.filter(j=>j.prefs.includes(id)).length;
+    if(h)S.confirm={title:"ลบศาลนี้ไม่ได้",body:`<p style="margin:0"><b>${esc(c.name)}</b> ยังมีผู้พิพากษา ${h} คน ย้ายหรือลบผู้พิพากษาออกก่อน แล้วจึงลบศาล</p>`};
+    else S.confirm={kind,id,title:"ลบศาลนี้?",ok:"ลบศาล",body:`<p style="margin:0">ลบ <b>${esc(c.name)}</b> ออกจากทะเบียน</p>${ap?`<div class="note warn">มี ${ap} คนเลือกศาลนี้ไว้ในคำขอ อันดับนั้นจะถูกเอาออก</div>`:""}`}}
+  render();
+}
+function doDelete(){
+  const{kind,id}=S.confirm;S.confirm=null;
+  if(kind==="req"){const j=J[id];j.prefs=[];j.req.status="none";j.req.at=null;hist(j,"เจ้าหน้าที่ยกเลิกคำขอ");log(`ยกเลิกคำขอของ ${j.name}`);render();toast("ยกเลิกคำขอแล้ว");return}
+  if(kind==="judge"){const j=J[id];JUDGES.splice(JUDGES.indexOf(j),1);delete J[id];delete S.locks[id];if(S.detail===id)S.detail=null;rlState("judges").sel=null;rlState("reqs").sel===id&&(rlState("reqs").sel=null);
+    log(`ลบ ${j.name} (#${fmt(j.sen)}) ออกจากทะเบียน`);afterDataChange();render();toast("ลบออกจากทะเบียนแล้ว");return}
+  const c=C[id];let n=0;for(const j of JUDGES){if(j.prefs.includes(id)){j.prefs=j.prefs.filter(x=>x!==id);hist(j,`อันดับที่เลือก ${c.name} ถูกเอาออกเพราะศาลถูกลบ`);n++}if(S.locks[j.id]===id)delete S.locks[j.id]}
+  COURTS.splice(COURTS.indexOf(c),1);delete C[id];rlState("courts").sel=null;if(S.openCourt===id)S.openCourt=null;
+  log(`ลบ${c.name}ออกจากทะเบียนศาล${n?` (เอาออกจากคำขอ ${n} ราย)`:""}`);afterDataChange();render();toast("ลบศาลแล้ว");
+}
+
+const PAGES={nation:pageNation,reqs:pageReqs,req:pageReq,home:pageJudgeHome,wish:pageWish,result:pageResult,history:pageHistory,rhome:pageRegionHome,review:pageReview,org:pageOrg,chome:pageCentralHome,run:pageRun,rules:pageRules,log:pageLog,khome:pageKT,judges:pageJudges,courts:pageCourts};
 
 /* =========================================================
    Actions
    ========================================================= */
-function login(id){const a=ACCOUNTS.find(x=>x.id===id);S.user=a;S.page=NAV[a.role][0][0];S.sel=null;S.step=0;S.nreg=null;S.nsel="root";S.nlist=null;S.nperson=null;S.ntab="h";render();window.scrollTo({top:0});toast(`เข้าสู่ระบบเป็น ${a.roleName}`)}
+function login(id){const a=ACCOUNTS.find(x=>x.id===id);S.user=a;S.page=NAV[a.role][0][0];S.sel=null;S.step=0;S.nreg=null;S.nsel="root";S.nlist=null;S.nperson=null;S.ntab="h";S.rl={};S.drawer=false;render();window.scrollTo({top:0});toast(`เข้าสู่ระบบเป็น ${a.roleName}`)}
 function saveReason(){const t=document.getElementById("reason");if(t){const j=CUR();j.req.reason=t.value}}
 const ACT={
   pick:a=>{S.pick=a;renderLogin()},
@@ -1279,15 +1703,30 @@ const ACT={
   nperson:a=>{if(!a){S.nperson=null}else{const[court,kind,i]=a.split("|");S.nperson={court,kind,i:+i};S.nsel=court}render();if(innerWidth<=980){const p=document.querySelector(".sticky");if(p)p.scrollIntoView({behavior:"smooth",block:"start"})}},
   open:a=>{saveReason();if(S.page!=="req")S.back=S.page;S.detail=a;go("req")},
   back:()=>go(S.back||NAV[S.user.role][0][0]),
-  reqs:a=>{S.qf={status:"all",region:"all",flag:null};S.q="";if(a){const[k,v]=a.split(":");S.qf[k]=v}go("reqs")},
-  qf:a=>{const[k,v]=a.split(":");if(k==="flag")S.qf.flag=S.qf.flag===v?null:v;else S.qf[k]=v;render()},
+  reqs:a=>{const st=rlState("reqs");st.f={};st.q="";st.pg=1;st.sel=null;st.tab="f";if(a){const[k,v]=a.split(":");st.f[k]=v}go("reqs")},
+  rlsel:a=>{const[k,id]=a.split("|");const st=rlState(k);st.sel=id;st.tab="d";render();if(innerWidth<=980){const p=document.getElementById("panel-"+k);if(p)p.scrollIntoView({behavior:"smooth",block:"start"})}},
+  rlsort:a=>{const[k,i]=a.split("|");const st=rlState(k);if(st.sort===+i){if(st.dir>0)st.dir=-1;else{st.sort=null;st.dir=1}}else{st.sort=+i;st.dir=1}st.pg=1;render()},
+  rlpg:a=>{const[k,p]=a.split("|");rlState(k).pg=+p;render();const t=root.querySelector(".rl-box");if(t&&t.getBoundingClientRect().top<0)t.scrollIntoView({block:"start"})},
+  rltab:a=>{const[k,t]=a.split("|");const st=rlState(k);if(t==="f"&&st.tab==="f")st.fopen=!st.fopen;else{st.tab=t;if(t==="f")st.fopen=true}render()},
+  rlf:a=>{const[k,f,v]=a.split("|");const st=rlState(k);st.f[f]=v;st.pg=1;render()},
+  rlfclear:k=>{const st=rlState(k);st.f={};st.q="";st.pg=1;render()},
+  rlqclear:k=>{const st=rlState(k);st.q="";st.pg=1;render()},
+  rlclose:k=>{const st=rlState(k);st.sel=null;st.tab="f";render()},
+  madd:k=>openModal(k,"add",null),
+  medit:a=>{const[k,id]=a.split("|");openModal(k,"edit",id)},
+  mdel:a=>{const[k,id]=a.split("|");askDelete(k,id)},
+  mclose:()=>{S.modal=null;render()},
+  msave:()=>saveModal(),
+  cclose:()=>{S.confirm=null;render()},
+  cdo:()=>doDelete(),
+  drawer:a=>{S.drawer=a==="1";render()},
   rgo:a=>{S.rfilter=a;go("review")},
   court:a=>{S.openCourt=a;go("org")},
   login:()=>login(S.pick),
-  logout:()=>{S.pick=S.user.id;S.user=null;render();window.scrollTo({top:0})},
+  logout:()=>{S.pick=S.user.id;S.user=null;S.drawer=false;S.modal=null;S.confirm=null;render();window.scrollTo({top:0})},
   switch:a=>login(a),
   reset:()=>{init();render();toast("รีเซ็ตเดโมแล้ว")},
-  nav:a=>{saveReason();if(a==="nation"&&S.page==="nation"){S.nreg=null;S.nsel="root";S.nlist=null;S.nperson=null}go(a)},
+  nav:a=>{saveReason();S.drawer=false;if(a==="nation"&&S.page==="nation"){S.nreg=null;S.nsel="root";S.nlist=null;S.nperson=null}go(a)},
   step:a=>{saveReason();S.step=+a;render();window.scrollTo({top:0})},
   add:a=>{const j=CUR();if(j.prefs.length<3)j.prefs.push(a);render()},
   rm:a=>{CUR().prefs.splice(+a,1);render()},
@@ -1320,10 +1759,12 @@ const ACT={
   sendback:()=>{const t=document.getElementById("ktnote");const note=(t&&t.value.trim())||"ขอให้ทบทวนกรณีที่มีเหตุผลพิเศษ";S.ktNote=note;S.phase=2;log(`ก.ต. ส่งร่างกลับให้แก้ไข: ${note}`);render();toast("ส่งกลับแล้ว")},
   resetrules:()=>{RULES=DEFAULT_RULES();if(S.phase===2)rerun();log("คืนค่ากฎเริ่มต้น");render();toast("คืนค่าเริ่มต้นแล้ว")},
 };
-root.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el||el.disabled)return;if(el.tagName==="A")e.preventDefault();const f=ACT[el.dataset.act];if(f)f(el.dataset.arg)});
+root.addEventListener("click",e=>{if(e.target.classList.contains("modal-bg")){if(S.confirm)S.confirm=null;else S.modal=null;render();return}const el=e.target.closest("[data-act]");if(!el||el.disabled)return;if(el.tagName==="A")e.preventDefault();const f=ACT[el.dataset.act];if(f)f(el.dataset.arg)});
 root.addEventListener("dblclick",e=>{const el=e.target.closest(".acct");if(el)login(el.dataset.arg)});
 root.addEventListener("change",e=>{
   const t=e.target;if(!S.user)return;
+  if(t.dataset.mf&&S.modal){S.modal.d[t.dataset.mf]=t.type==="checkbox"?t.checked:t.value;delete S.modal.err[t.dataset.mf];if(t.tagName==="SELECT"){if(t.dataset.mf==="jid"){const j=J[t.value];Object.assign(S.modal.d,{p1:"",p2:"",p3:"",reason:j?(j.req.special||j.req.reason||""):"",fallback:j?!!j.req.fallback:false})}render()}return}
+  if(t.dataset.rlsize){const st=rlState(t.dataset.rlsize);st.size=+t.value;st.pg=1;render();return}
   if(S.page==="wish"){const j=CUR();
     if(t.id==="sjob"){j.spouse=t.value==="ไม่มีคู่สมรส"?null:{...(j.spouse||{prov:"ลำปาง"}),job:t.value}}
     else if(t.id==="sprov"&&j.spouse)j.spouse.prov=t.value;
@@ -1344,8 +1785,11 @@ root.addEventListener("change",e=>{
     if(map[t.id]){map[t.id]();if(S.phase===2)rerun();log(`แก้กฎ ${t.id.toUpperCase()}`);render();toast(S.phase===2?"บันทึกกฎแล้ว ร่างผลคำนวณใหม่":"บันทึกกฎแล้ว")}
   }
 });
-root.addEventListener("input",e=>{if(e.target.id==="q"){S.q=e.target.value;render();const q=document.getElementById("q");q.focus();q.setSelectionRange(q.value.length,q.value.length);return}
+root.addEventListener("input",e=>{const t=e.target;
+  if(t.dataset.mf&&S.modal&&t.type!=="checkbox"&&t.tagName!=="SELECT"){S.modal.d[t.dataset.mf]=t.value;return}
+  if(t.dataset.rlq){const k=t.dataset.rlq,st=rlState(k);st.q=t.value;st.pg=1;render();const q=document.getElementById("q-"+k);q.focus();q.setSelectionRange(q.value.length,q.value.length);return}
   if(e.target.id==="km"){const v=document.getElementById("kmv");if(v)v.textContent=e.target.value+" กม."}});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(S.confirm){S.confirm=null;render()}else if(S.modal){S.modal=null;render()}else if(S.drawer){S.drawer=false;render()}});
 render();
 </script>
 
